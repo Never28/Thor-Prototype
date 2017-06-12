@@ -70,7 +70,7 @@ public class RPGCharacterControllerFREE : MonoBehaviour
 
 	//isStrafing/action variables
 	bool canAction = true;
-	bool isStrafing = false;
+	public bool isStrafing = false;
 	bool isDead = false;
 	bool isBlocking = false;
 	public float knockbackMultiplier = 1f;
