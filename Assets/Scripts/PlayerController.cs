@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 public class PlayerController : MonoBehaviour
@@ -13,6 +14,7 @@ public class PlayerController : MonoBehaviour
     //References
     public Camera sceneCamera;
     public GameObject target;
+    public StateManager movementStateManager;
     
     //NavMesh variables
     public bool useNavMesh;
@@ -79,6 +81,7 @@ public class PlayerController : MonoBehaviour
 			agent = gameObject.AddComponent<UnityEngine.AI.NavMeshAgent> ();
 		}
         agent.enabled = !useNavMesh;
+
     }
 
     #endregion
@@ -89,14 +92,15 @@ public class PlayerController : MonoBehaviour
         if (animator) {
 			if(canMove && !isBlocking && !isDead && !useNavMesh){
 				CameraRelativeMovement();
-			} 
-			//Rolling();
-			Jumping();
-        }else {
-            Debug.Log("ERROR: There is no animator for characeter.");
+			}
+            Jumping();
         }
-
-        if (useNavMesh) {
+        else
+        {
+            Debug.Log("ERROR: There is no animator for character.");
+        }
+        if (useNavMesh)
+        {
             navMeshSpeed = agent.velocity.magnitude;
             agent.destination = goal.position;
         }
@@ -186,7 +190,7 @@ public class PlayerController : MonoBehaviour
     //rotate character towards direction moved
     void RotateTowardMovementDir() {
         if (inputVector != Vector3.zero && !isStrafing && !isRolling & !isBlocking) {
-            //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(inputVector), Time.deltaTime * rotationSpeed);
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(inputVector), Time.deltaTime * rotationSpeed);
         }
     }
 
@@ -336,8 +340,30 @@ public class PlayerController : MonoBehaviour
     
     #endregion
 
+    #region _Coroutines
+
+    //method to keep character from moveing while attacking, etc
+    public IEnumerator _LockMovementAndAttack(float delayTime, float lockTime)
+    {
+        yield return new WaitForSeconds(delayTime);
+        canAction = false;
+        canMove = false;
+        animator.SetBool("Moving", false);
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        inputVector = new Vector3(0, 0, 0);
+        animator.applyRootMotion = true;
+        yield return new WaitForSeconds(lockTime);
+        canAction = true;
+        canMove = true;
+        animator.applyRootMotion = false;
+    }
+
+    #endregion
+
 
 	#region AnimationEvents
+
 	void Hit()
 	{
 
