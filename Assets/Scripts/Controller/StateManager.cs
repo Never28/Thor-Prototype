@@ -23,6 +23,7 @@ public class StateManager : MonoBehaviour
     public float rotationSpeed = 5;
     public float distanceToGround = 0.5f;
     public float rollSpeed = 1;
+    public float parryOffset = 1.5f;
 
     [Header("States")]
     public bool onGround;
@@ -32,6 +33,8 @@ public class StateManager : MonoBehaviour
     public bool canMove;
     public bool isTwoHanded;
     public bool usingItem;
+    public bool canBeParried;
+    public bool parryIsOn;
     public bool isBlocking;
     public bool isLeftHand;
 
@@ -39,6 +42,7 @@ public class StateManager : MonoBehaviour
     public EnemyTarget lockonTarget;
     public Transform lockonTransform;
     public AnimationCurve rollCurve;
+    public EnemyStates parryTarget;
 
     [HideInInspector]
     public Animator anim;
@@ -239,6 +243,8 @@ public class StateManager : MonoBehaviour
     }
 
     void AttackAction(Action slot) {
+        if (CheckForParry(slot))
+            return;
         string targetAnim = null;
         targetAnim = slot.targetAnim;
 
@@ -247,8 +253,56 @@ public class StateManager : MonoBehaviour
 
         canMove = false;
         inAction = true;
+        float targetSpeed = 1;
+        if (slot.changeSpeed)
+        {
+            targetSpeed = slot.animSpeed;
+            if (targetSpeed <= 0)
+                targetSpeed = 1;
+        }
+        anim.SetFloat("animSpeed", targetSpeed);
         anim.SetBool("mirror", slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
+    }
+
+    bool CheckForParry(Action slot) {
+        if (!parryTarget)
+            return false;
+
+        float dis = Vector3.Distance(parryTarget.transform.position, transform.position);
+
+        if (dis > 3)
+            return false;
+
+        Vector3 dir = parryTarget.transform.position - transform.position;
+        dir.Normalize();
+        dir.y = 0;
+        float angle = Vector3.Angle(transform.forward, dir);
+
+        if (angle < 60) {
+            Vector3 targetPos = -dir * parryOffset;
+            targetPos += parryTarget.transform.position;
+            transform.position = targetPos;
+
+            if (dir == Vector3.zero)
+                dir = -parryTarget.transform.forward;
+
+            Quaternion eRotation = Quaternion.LookRotation(-dir);
+            Quaternion ourRotation = Quaternion.LookRotation(dir);
+
+            parryTarget.transform.rotation = eRotation;
+            transform.rotation = ourRotation;
+
+            parryTarget.IsGettingParried();
+
+            canMove = false;
+            inAction = true;
+            anim.SetBool("mirror", slot.mirror);
+            anim.CrossFade("parry_attack", 0.2f);
+            return true;
+        }   
+
+        return false;
     }
 
     void BlockAction(Action slot) {
@@ -264,8 +318,16 @@ public class StateManager : MonoBehaviour
         if (string.IsNullOrEmpty(targetAnim))
             return;
 
+        canBeParried = slot.canBeParried;
         canMove = false;
         inAction = true;
+        float targetSpeed = 1;
+        if (slot.changeSpeed)
+        {
+            targetSpeed = slot.animSpeed;
+            if (targetSpeed <= 0)
+                targetSpeed = 1;
+        }
         anim.SetBool("mirror", slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
     }
@@ -364,5 +426,9 @@ public class StateManager : MonoBehaviour
             actionManager.UpdateActionsTwoHanded();
         else
             actionManager.UpdateActionsOneHanded(); 
+    }
+
+    public void IsGettingParried() { 
+        
     }
 }

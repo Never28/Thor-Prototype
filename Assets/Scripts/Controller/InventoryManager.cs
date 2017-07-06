@@ -8,6 +8,8 @@ public class InventoryManager : MonoBehaviour {
     public Weapon leftHandWeapon;
     public bool hasLeftHandWeapon = true;
 
+    public GameObject parryCollider;
+
     StateManager states;
 
     public void Init(StateManager st) {
@@ -16,6 +18,9 @@ public class InventoryManager : MonoBehaviour {
         if(hasLeftHandWeapon)
             EquipWeapon(leftHandWeapon, true);
         CloseAllDamageColliders();
+        ParryCollider pr = parryCollider.GetComponent < ParryCollider>();
+        pr.Init(st);
+        CloseParryCollider();
     }
 
     public void EquipWeapon(Weapon w, bool isLeft = false) {
@@ -40,6 +45,14 @@ public class InventoryManager : MonoBehaviour {
             rightHandWeapon.w_hook.CloseDamageColliders();
         if (leftHandWeapon.w_hook != null)
             leftHandWeapon.w_hook.CloseDamageColliders();
+    }
+
+    public void OpenParryCollider() {
+        parryCollider.SetActive(true);
+    }
+
+    public void CloseParryCollider() {
+        parryCollider.SetActive(false);
     }
 }
 

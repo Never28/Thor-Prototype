@@ -5,9 +5,15 @@ using UnityEngine;
 public class EnemyStates : MonoBehaviour {
 
     public float health;
+    public bool canBeParried = true;
+    public bool parryIsOn = true;
+    //public bool doParry = false;
     public bool isInvincible;
     public bool canMove;
     public bool isDead;
+    public bool dontDoAnything;
+
+    StateManager parriedBy;
 
     public Animator anim;
     EnemyTarget enemyTarget;
@@ -74,6 +80,11 @@ public class EnemyStates : MonoBehaviour {
         delta = Time.deltaTime;
         canMove = anim.GetBool("canMove");
 
+        if (dontDoAnything) {
+            dontDoAnything = !canMove;
+            return;
+        }
+
         if (health <= 0) {
             if (!isDead)
             {
@@ -84,6 +95,11 @@ public class EnemyStates : MonoBehaviour {
 
         if (isInvincible) {
             isInvincible = !canMove;
+        }
+
+        if (parriedBy != null && !parryIsOn) {
+            parriedBy.parryTarget = null;
+            parriedBy = null;
         }
 
         if (canMove)
@@ -99,5 +115,32 @@ public class EnemyStates : MonoBehaviour {
         anim.Play("damage_2");
         anim.applyRootMotion = true;
         anim.SetBool("canMove", false);
+    }
+
+    public void CheckForParry(Transform target, StateManager st) {
+        if (!canBeParried || !parryIsOn || isInvincible)
+            return;
+
+        //check if enemy is attacking from behind and entered the trigger from behind
+        Vector3 dir = transform.position - target.position;
+        dir.Normalize();
+        float dot = Vector3.Dot(target.forward, dir);
+        if (dot < 0)
+            return; 
+
+        isInvincible = true;
+        anim.Play("attack_interrupt");
+        anim.applyRootMotion = true;
+        anim.SetBool("canMove", false);
+        st.parryTarget = this;
+        parriedBy = st;
+        return;
+    }
+
+    public void IsGettingParried()
+    {
+        dontDoAnything = true;
+        anim.SetBool("canMove", false);
+        anim.Play("parry_received");
     }
 }
