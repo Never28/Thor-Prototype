@@ -66,7 +66,7 @@ public class StateManager : MonoBehaviour
         rigid.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
 
         inventoryManager = GetComponent<InventoryManager>();
-        inventoryManager.Init();
+        inventoryManager.Init(this);
 
         actionManager = GetComponent<ActionManager>();
         actionManager.Init(this);
@@ -112,7 +112,7 @@ public class StateManager : MonoBehaviour
         DetectItemAction();
         DetectAction();
         
-        inventoryManager.curWeapon.weaponModel.SetActive(!usingItem);
+        inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
 
         if (inAction)
         {
@@ -224,6 +224,7 @@ public class StateManager : MonoBehaviour
 
         canMove = false;
         inAction = true;
+        anim.SetBool("mirror", slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
     }
 

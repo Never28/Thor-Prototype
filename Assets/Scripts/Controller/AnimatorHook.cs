@@ -105,13 +105,13 @@ public class AnimatorHook : MonoBehaviour
         if (states == null)
             return;
 
-        states.inventoryManager.curWeapon.w_hook.OpenDamageColliders();
+        states.inventoryManager.OpenAllDamageColliders();
     }
 
     public void CloseDamageColliders() {
         if (states == null)
             return;
 
-        states.inventoryManager.curWeapon.w_hook.CloseDamageColliders();
+        states.inventoryManager.CloseAllDamageColliders(); 
     }
 }

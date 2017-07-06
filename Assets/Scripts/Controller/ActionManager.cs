@@ -16,9 +16,15 @@ public class ActionManager : MonoBehaviour {
         UpdateActionsOneHanded();
     }
 
-    public void UpdateActionsOneHanded() {
+    public void UpdateActionsOneHanded()
+    {
         EmptyAllSlots();
-        Weapon w = states.inventoryManager.curWeapon;
+
+        if (states.inventoryManager.hasLeftHandWeapon) {
+            UpdateActionsWithLeftHand();
+            return;
+        }
+        Weapon w = states.inventoryManager.rightHandWeapon;
 
         for (int i = 0; i < w.actions.Count; i++)
         {
@@ -27,10 +33,32 @@ public class ActionManager : MonoBehaviour {
         }
     }
 
+    public void UpdateActionsWithLeftHand()
+    {
+        Weapon r_w = states.inventoryManager.rightHandWeapon;
+        Weapon l_w = states.inventoryManager.leftHandWeapon;
+
+        Action rb = GetAction(ActionInput.rb);
+        Action rt = GetAction(ActionInput.rt);
+        rb.targetAnim = r_w.GetAction(r_w.actions, ActionInput.rb).targetAnim;
+        rt.targetAnim = r_w.GetAction(r_w.actions, ActionInput.rt).targetAnim;
+
+        Action lb = GetAction(ActionInput.lb);
+        Action lt = GetAction(ActionInput.lt);
+        lb.targetAnim = l_w.GetAction(l_w.actions, ActionInput.rb).targetAnim;
+        lt.targetAnim = l_w.GetAction(l_w.actions, ActionInput.rt).targetAnim;
+
+        if (l_w.leftHandMirror) {
+            lb.mirror = true;
+            lt.mirror = true;
+        }
+
+    }
+
     public void UpdateActionsTwoHanded()
     {
         EmptyAllSlots();
-        Weapon w = states.inventoryManager.curWeapon;
+        Weapon w = states.inventoryManager.rightHandWeapon;
 
         for (int i = 0; i < w.twoHandedActions.Count; i++)
         {
@@ -44,6 +72,7 @@ public class ActionManager : MonoBehaviour {
         {
             Action a = GetAction((ActionInput)i);
             a.targetAnim = null;
+            a.mirror = false;
         }
     }
 
@@ -97,6 +126,7 @@ public enum ActionInput {
 public class Action {
     public ActionInput input;
     public string targetAnim;
+    public bool mirror = false;
 }
 
 [System.Serializable]
