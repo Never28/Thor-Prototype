@@ -1,27 +1,15 @@
 fileFormatVersion: 2
-guid: 6ed9835b1aee24d4a8bd6abbfa385861
-timeCreated: 1486455962
+guid: 30e226a0497abce44a65b3a7be78eeac
+timeCreated: 1499370123
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
   fileIDToRecycleName:
-    100000: clip_M4A1
-    100002: //RootNode
-    100004: M4A1_polySurface1
-    100006: M4A1_polySurface2
-    400000: clip_M4A1
-    400002: //RootNode
-    400004: M4A1_polySurface1
-    400006: M4A1_polySurface2
-    2300000: clip_M4A1
-    2300002: M4A1_polySurface1
-    2300004: M4A1_polySurface2
-    3300000: clip_M4A1
-    3300002: M4A1_polySurface1
-    3300004: M4A1_polySurface2
-    4300000: clip_M4A1
-    4300002: M4A1_polySurface1
-    4300004: M4A1_polySurface2
+    100000: //RootNode
+    400000: //RootNode
+    2300000: //RootNode
+    3300000: //RootNode
+    4300000: prop_shield_01
   materials:
     importMaterials: 1
     materialName: 0
@@ -32,6 +20,8 @@ ModelImporter:
     resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -46,7 +36,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.005
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1
@@ -68,6 +58,7 @@ ModelImporter:
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
+    serializedVersion: 2
     human: []
     skeleton: []
     armTwist: 0.5
@@ -78,7 +69,10 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 0
   humanoidOversampling: 1
