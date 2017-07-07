@@ -13,7 +13,7 @@ public class EnemyStates : MonoBehaviour {
     public bool isDead;
     public bool dontDoAnything;
 
-    StateManager parriedBy;
+    public StateManager parriedBy;
 
     public Animator anim;
     EnemyTarget enemyTarget;
@@ -23,6 +23,8 @@ public class EnemyStates : MonoBehaviour {
 
     List<Rigidbody> ragdollRigids = new List<Rigidbody>();
     List<Collider> ragdollColliders = new List<Collider>();
+
+    float timer;
 
     void Start()
     {
@@ -39,6 +41,7 @@ public class EnemyStates : MonoBehaviour {
         a_hook.Init(null, this);
 
         InitRagdoll();
+        parryIsOn = false;
     }
 
     void InitRagdoll() { 
@@ -98,12 +101,27 @@ public class EnemyStates : MonoBehaviour {
         }
 
         if (parriedBy != null && !parryIsOn) {
-            parriedBy.parryTarget = null;
+            //parriedBy.parryTarget = null;
             parriedBy = null;
         }
 
-        if (canMove)
+        if (canMove) {
             anim.applyRootMotion = false;
+
+            //Debug
+            timer += Time.deltaTime;
+            if (timer > 2) {
+                DoAction();
+                timer = 0;
+            }
+        }
+
+    }
+
+    void DoAction() {
+        anim.Play("oh_attack_1");
+        anim.applyRootMotion = true;
+        anim.SetBool("canMove", false);
     }
 
     public void DoDamage(float v) {
@@ -132,7 +150,7 @@ public class EnemyStates : MonoBehaviour {
         anim.Play("attack_interrupt");
         anim.applyRootMotion = true;
         anim.SetBool("canMove", false);
-        st.parryTarget = this;
+        //st.parryTarget = this;
         parriedBy = st;
         return;
     }

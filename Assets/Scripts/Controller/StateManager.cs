@@ -42,7 +42,7 @@ public class StateManager : MonoBehaviour
     public EnemyTarget lockonTarget;
     public Transform lockonTransform;
     public AnimationCurve rollCurve;
-    public EnemyStates parryTarget;
+    //public EnemyStates parryTarget;
 
     [HideInInspector]
     public Animator anim;
@@ -58,7 +58,7 @@ public class StateManager : MonoBehaviour
     [HideInInspector]
     public float delta;
     [HideInInspector]
-    public LayerMask ignoreLayer;
+    public LayerMask ignoreLayers;
 
     float _actionDelay;
 
@@ -83,7 +83,7 @@ public class StateManager : MonoBehaviour
         a_hook.Init(this, null);
 
         gameObject.layer = 8;
-        ignoreLayer = ~(1 << 9);
+        ignoreLayers = ~(1 << 9);
 
         anim.SetBool("onGround", true);
     }
@@ -245,6 +245,9 @@ public class StateManager : MonoBehaviour
     void AttackAction(Action slot) {
         if (CheckForParry(slot))
             return;
+        if (CheckForBackstab(slot))
+            return;
+
         string targetAnim = null;
         targetAnim = slot.targetAnim;
 
@@ -266,13 +269,24 @@ public class StateManager : MonoBehaviour
     }
 
     bool CheckForParry(Action slot) {
-        if (!parryTarget)
-            return false;
+        EnemyStates parryTarget = null;
 
-        float dis = Vector3.Distance(parryTarget.transform.position, transform.position);
+        Vector3 origin = transform.position;
+        origin.y += 1;
+        Vector3 rayDir = transform.forward;
+        RaycastHit hit;
+        if (Physics.Raycast(origin, rayDir, out hit, 3, ignoreLayers)) {
+            parryTarget = hit.transform.GetComponentInParent<EnemyStates>();
+        }
 
-        if (dis > 3)
+        if (parryTarget == null)
             return false;
+        if (parryTarget.parriedBy == null)
+            return false;
+        //float dis = Vector3.Distance(parryTarget.transform.position, transform.position);
+
+        //if (dis > 3)
+        //    return false;
 
         Vector3 dir = parryTarget.transform.position - transform.position;
         dir.Normalize();
@@ -301,6 +315,48 @@ public class StateManager : MonoBehaviour
             anim.CrossFade("parry_attack", 0.2f);
             return true;
         }   
+
+        return false;
+    }
+
+    bool CheckForBackstab(Action slot) {
+        if (!slot.canBackstab)
+            return false;
+
+        EnemyStates backstabTarget = null;
+
+        Vector3 origin = transform.position;
+        origin.y += 1;
+        Vector3 rayDir = transform.forward;
+        RaycastHit hit;
+        if (Physics.Raycast(origin, rayDir, out hit, 3, ignoreLayers))
+        {
+            backstabTarget = hit.transform.GetComponentInParent<EnemyStates>();
+        }
+
+        if (backstabTarget == null)
+            return false;
+
+        Vector3 dir = transform.position - backstabTarget.transform.position;
+        dir.Normalize();
+        dir.y = 0;
+        float angle = Vector3.Angle(backstabTarget.transform.forward, dir);
+
+        if (angle > 150)
+        {
+            Vector3 targetPos = dir * parryOffset;
+            targetPos += backstabTarget.transform.position;
+            transform.position = targetPos;
+
+            backstabTarget.transform.rotation = transform.rotation;
+            backstabTarget.IsGettingParried();
+
+            canMove = false;
+            inAction = true;
+            anim.SetBool("mirror", slot.mirror);
+            anim.CrossFade("parry_attack", 0.2f);
+            return true;
+        }
 
         return false;
     }
@@ -409,7 +465,7 @@ public class StateManager : MonoBehaviour
         float dis = distanceToGround + 0.3f;
         RaycastHit hit;
         Debug.DrawRay(origin, dir * dis);
-        if (Physics.Raycast(origin, dir, out hit, dis, ignoreLayer))
+        if (Physics.Raycast(origin, dir, out hit, dis, ignoreLayers))
         {
             r = true;
             Vector3 targetPosition = hit.point;

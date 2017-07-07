@@ -102,7 +102,7 @@ public class AnimatorHook : MonoBehaviour
     }
 
     public void OpenDamageColliders() {
-        if (states)
+        if (states) 
             states.inventoryManager.OpenAllDamageColliders();
         OpenParryFlag();
     }
