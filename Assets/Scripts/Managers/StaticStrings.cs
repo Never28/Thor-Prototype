@@ -25,13 +25,11 @@ public static class StaticStrings
     public static string animSpeed = "animSpeed";
     public static string onGround = "onGround";
     public static string run = "run";
-    public static string two_handed = "two_handed";
     public static string interacting = "interacting";
     public static string blocking = "blocking";
     public static string isLeft = "isLeft";
     public static string canMove = "canMove";
     public static string lockon = "lockon";
-    public static string changeWeapon = "changeWeapon";
 
     //Animator States
     public static string Rolls = "Rolls";
@@ -41,4 +39,13 @@ public static class StaticStrings
     public static string damage_1 = "damage_1";
     public static string damage_2 = "damage_2";
     public static string damage_3 = "damage_3";
+    public static string changeWeapon = "changeWeapon";
+    public static string EmptyBoth = "Empty Both";
+    public static string EmptyLeft = "Empty Left";
+    public static string EmptyRight = "Empty Right";
+    public static string equip_weapon_oh = "equip_weapon_oh";
+
+    //Other
+    public static string _r = "_r";
+    public static string _l = "_l";
 }

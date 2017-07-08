@@ -126,8 +126,8 @@ public class StateManager : MonoBehaviour
 
         DetectAction();
         DetectItemAction();
-                
-        inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
+
+        inventoryManager.rightHandWeapon.instance.weaponModel.SetActive(!usingItem);
 
         anim.SetBool(StaticStrings.blocking, isBlocking);
         anim.SetBool(StaticStrings.isLeft, isLeftHand);
@@ -280,6 +280,9 @@ public class StateManager : MonoBehaviour
     }
 
     bool CheckForParry(Action slot) {
+        if (!slot.canParry)
+            return false;
+
         EnemyStates parryTarget = null;
 
         Vector3 origin = transform.position;
@@ -318,7 +321,7 @@ public class StateManager : MonoBehaviour
             parryTarget.transform.rotation = eRotation;
             transform.rotation = ourRotation;
 
-            parryTarget.IsGettingParried(inventoryManager.GetCurrentWeapon(isLeftHand).parryStats);
+            parryTarget.IsGettingParried(slot);
 
             canMove = false;
             inAction = true;
@@ -360,7 +363,7 @@ public class StateManager : MonoBehaviour
             transform.position = targetPos;
 
             backstabTarget.transform.rotation = transform.rotation;
-            backstabTarget.IsGettingBackstabbed(inventoryManager.GetCurrentWeapon(isLeftHand).backstabStats);
+            backstabTarget.IsGettingBackstabbed(slot);
 
             canMove = false;
             inAction = true;
@@ -489,11 +492,46 @@ public class StateManager : MonoBehaviour
 
     public void HandleTwoHanded()
     {
-        anim.SetBool(StaticStrings.two_handed, isTwoHanded);
-        if (isTwoHanded)
+        bool isRight = true;
+        Weapon w = inventoryManager.rightHandWeapon.instance;
+        if (w == null) {
+            w = inventoryManager.leftHandWeapon.instance;
+            isRight = false;
+        }
+        if (w == null)
+            return;
+
+        if (isTwoHanded){
+            anim.CrossFade(w.th_idle, 0.2f);
             actionManager.UpdateActionsTwoHanded();
-        else
-            actionManager.UpdateActionsOneHanded(); 
+            if (isRight)
+            {
+                if (inventoryManager.leftHandWeapon)
+                    inventoryManager.leftHandWeapon.instance.weaponModel.SetActive(false);
+            }
+            else {
+                if (inventoryManager.rightHandWeapon)
+                    inventoryManager.rightHandWeapon.instance.weaponModel.SetActive(false);
+            }
+        }
+        else{
+            string targetAnim = w.oh_idle;
+            targetAnim += (isRight) ? StaticStrings._r : StaticStrings._l;
+            //anim.CrossFade(targetAnim, 0.2f);
+            anim.Play(StaticStrings.equip_weapon_oh);
+            actionManager.UpdateActionsOneHanded();
+            if (isRight)
+            {
+                if (inventoryManager.leftHandWeapon)
+                    inventoryManager.leftHandWeapon.instance.weaponModel.SetActive(true);
+            }
+            else
+            {
+                if (inventoryManager.rightHandWeapon)
+                    inventoryManager.rightHandWeapon.instance.weaponModel.SetActive(true);
+            }
+        }
+
     }
 
     public void IsGettingParried() { 

@@ -179,19 +179,19 @@ public class EnemyStates : MonoBehaviour {
         return;
     }
 
-    public void IsGettingParried(WeaponStats weaponStats)
+    public void IsGettingParried(Action a)
     {
-        int damage = StatsCalculations.CalculateBaseDamage(weaponStats, characterStats);
-        health = damage;
+        int damage = StatsCalculations.CalculateBaseDamage(a.weaponStats, characterStats, a.parryMultiplier);
+        health -= damage;
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);
         anim.Play(StaticStrings.parry_received);
     }
 
-    public void IsGettingBackstabbed(WeaponStats weaponStats)
+    public void IsGettingBackstabbed(Action a)
     {
-        int damage = StatsCalculations.CalculateBaseDamage(weaponStats, characterStats);
-        health = damage;
+        int damage = StatsCalculations.CalculateBaseDamage(a.weaponStats, characterStats, a.backstabMultiplier);
+        health -= damage;
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);
         anim.Play(StaticStrings.backstabbed);
