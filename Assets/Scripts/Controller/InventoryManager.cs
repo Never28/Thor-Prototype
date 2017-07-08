@@ -17,7 +17,9 @@ public class InventoryManager : MonoBehaviour {
         EquipWeapon(rightHandWeapon, false);
         if(hasLeftHandWeapon)
             EquipWeapon(leftHandWeapon, true);
+        InitAllDamageColliders(st);
         CloseAllDamageColliders();
+
         ParryCollider pr = parryCollider.GetComponent < ParryCollider>();
         pr.Init(st);
         CloseParryCollider();
@@ -37,6 +39,13 @@ public class InventoryManager : MonoBehaviour {
 
     }
 
+    public Weapon GetCurrentWeapon(bool isLeft) {
+        if (isLeft)
+            return leftHandWeapon;
+        else
+            return rightHandWeapon;
+    }
+
     public void OpenAllDamageColliders()
     {
         if (rightHandWeapon.w_hook != null)
@@ -50,6 +59,13 @@ public class InventoryManager : MonoBehaviour {
             rightHandWeapon.w_hook.CloseDamageColliders();
         if (leftHandWeapon.w_hook != null)
             leftHandWeapon.w_hook.CloseDamageColliders();
+    }
+
+    public void InitAllDamageColliders(StateManager states) {
+        if (rightHandWeapon.w_hook != null)
+            rightHandWeapon.w_hook.InitDamageColliders(states);
+        if (leftHandWeapon.w_hook != null)
+            leftHandWeapon.w_hook.InitDamageColliders(states);
     }
 
     public void OpenParryCollider() {
@@ -68,8 +84,11 @@ public class Weapon
     public Sprite icon;
     public string oh_idle;
     public string th_idle;
+
     public List<Action> actions;
     public List<Action> twoHandedActions;
+    public WeaponStats parryStats;
+    public WeaponStats backstabStats;
     public bool leftHandMirror;
     public GameObject weaponModel;
     public WeaponHook w_hook;

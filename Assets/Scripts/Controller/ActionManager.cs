@@ -46,11 +46,26 @@ public class ActionManager : MonoBehaviour {
         a.changeSpeed = w_a.changeSpeed;
         a.animSpeed = w_a.animSpeed;
         a.canBackstab = w_a.canBackstab;
+        a.overrideDamageAnim = w_a.overrideDamageAnim;
+        a.damageAnim = w_a.damageAnim;
 
         if (isLeftHand)
         {
             a.mirror = true;
         }
+
+        DeepCopyWeaponStats(w_a.weaponStats, a.weaponStats);
+    }
+
+    public void DeepCopyWeaponStats(WeaponStats from, WeaponStats to) {
+        to.physical = from.physical;
+        to.strike = from.strike;
+        to.slash = from.slash;
+        to.thrust = from.thrust;
+        to.magic = from.magic;
+        to.fire = from.fire;
+        to.lightning = from.lightning;
+        to.dark = from.dark;
     }
 
     public void UpdateActionsTwoHanded()
@@ -116,6 +131,10 @@ public class ActionManager : MonoBehaviour {
 
         return ActionInput.rb;
     }
+
+    public bool IsLeftHandSlot(Action slot) {
+        return (slot.input == ActionInput.lb || slot.input == ActionInput.lt);
+    }
 }
 
 public enum ActionInput { 
@@ -136,6 +155,11 @@ public class Action {
     public bool changeSpeed = false;
     public float animSpeed = 1.0f;
     public bool canBackstab = false;
+
+    public bool overrideDamageAnim;
+    public string damageAnim;
+
+    public WeaponStats weaponStats;
 }
 
 [System.Serializable]

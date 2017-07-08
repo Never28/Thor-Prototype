@@ -19,4 +19,12 @@ public class WeaponHook : MonoBehaviour {
             damageColliders[i].SetActive(false);
         }
     }
+
+    public void InitDamageColliders(StateManager states)
+    {
+        for (int i = 0; i < damageColliders.Length; i++)
+        {
+            damageColliders[i].GetComponent<DamageCollider>().Init(states);
+        }
+    }
 }

@@ -8,6 +8,10 @@ public class StateManager : MonoBehaviour
     [Header("Init")]
     public GameObject activeModel;
 
+    [Header("Stats")]
+    public Attributes attributes;
+    public CharacterStats characterStats;
+
     [Header("Inputs")]
     public float horizontal;
     public float vertical;
@@ -60,6 +64,9 @@ public class StateManager : MonoBehaviour
     public float delta;
     [HideInInspector]
     public LayerMask ignoreLayers;
+
+    [HideInInspector]
+    public Action currentAction;
 
     float _actionDelay;
 
@@ -244,6 +251,7 @@ public class StateManager : MonoBehaviour
     }
 
     void AttackAction(Action slot) {
+
         if (CheckForParry(slot))
             return;
         if (CheckForBackstab(slot))
@@ -254,6 +262,8 @@ public class StateManager : MonoBehaviour
 
         if (string.IsNullOrEmpty(targetAnim))
             return;
+
+        currentAction = slot;
 
         canMove = false;
         inAction = true;
@@ -308,7 +318,7 @@ public class StateManager : MonoBehaviour
             parryTarget.transform.rotation = eRotation;
             transform.rotation = ourRotation;
 
-            parryTarget.IsGettingParried();
+            parryTarget.IsGettingParried(inventoryManager.GetCurrentWeapon(isLeftHand).parryStats);
 
             canMove = false;
             inAction = true;
@@ -350,7 +360,7 @@ public class StateManager : MonoBehaviour
             transform.position = targetPos;
 
             backstabTarget.transform.rotation = transform.rotation;
-            backstabTarget.IsGettingBackstabbed();
+            backstabTarget.IsGettingBackstabbed(inventoryManager.GetCurrentWeapon(isLeftHand).backstabStats);
 
             canMove = false;
             inAction = true;
