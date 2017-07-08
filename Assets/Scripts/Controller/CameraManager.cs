@@ -33,6 +33,9 @@ public class CameraManager : MonoBehaviour
 
     bool usedRightAxis;
 
+    bool changeTargetLeft;
+    bool changeTargetRight;
+
     public void Init(StateManager st)
     {
         states = st;
@@ -52,6 +55,9 @@ public class CameraManager : MonoBehaviour
 
         float targetSpeed = mouseSpeed;
 
+        changeTargetLeft = Input.GetKeyUp(KeyCode.V);
+        changeTargetRight = Input.GetKeyUp(KeyCode.B);
+
         if (lockonTarget != null) {
             if (lockonTransform == null) {
                 lockonTransform = lockonTarget.GetTarget();
@@ -63,6 +69,10 @@ public class CameraManager : MonoBehaviour
                     states.lockonTransform = lockonTransform;
                     usedRightAxis = true;
                 }
+            }
+            if (changeTargetRight || changeTargetLeft) {
+                lockonTransform = lockonTarget.GetTarget(changeTargetLeft);
+                states.lockonTransform = lockonTransform;
             }
         }
 

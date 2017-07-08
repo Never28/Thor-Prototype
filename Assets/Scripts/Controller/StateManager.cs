@@ -24,6 +24,7 @@ public class StateManager : MonoBehaviour
     public float distanceToGround = 0.5f;
     public float rollSpeed = 1;
     public float parryOffset = 1.5f;
+    public float backstabOffset = 1.5f;
 
     [Header("States")]
     public bool onGround;
@@ -85,7 +86,7 @@ public class StateManager : MonoBehaviour
         gameObject.layer = 8;
         ignoreLayers = ~(1 << 9);
 
-        anim.SetBool("onGround", true);
+        anim.SetBool(StaticStrings.onGround, true);
     }
 
     void SetupAnimator()
@@ -114,15 +115,15 @@ public class StateManager : MonoBehaviour
         delta = d;
 
         isBlocking = false;
-        usingItem = anim.GetBool("interacting");
+        usingItem = anim.GetBool(StaticStrings.interacting);
 
         DetectAction();
         DetectItemAction();
                 
         inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
 
-        anim.SetBool("blocking", isBlocking);
-        anim.SetBool("isLeft", isLeftHand);
+        anim.SetBool(StaticStrings.blocking, isBlocking);
+        anim.SetBool(StaticStrings.isLeft, isLeftHand);
 
         if (inAction)
         {
@@ -139,7 +140,7 @@ public class StateManager : MonoBehaviour
             }
         }
 
-        canMove = anim.GetBool("canMove");
+        canMove = anim.GetBool(StaticStrings.canMove);
 
         if (!canMove)
         {
@@ -184,7 +185,7 @@ public class StateManager : MonoBehaviour
         Quaternion targetRotation = Quaternion.Slerp(transform.rotation, tr, delta * moveAmount * rotationSpeed);
         transform.rotation = targetRotation;
 
-        anim.SetBool("lockon", lockOn);
+        anim.SetBool(StaticStrings.lockon, lockOn);
 
         if (lockOn)
         {
@@ -263,8 +264,8 @@ public class StateManager : MonoBehaviour
             if (targetSpeed <= 0)
                 targetSpeed = 1;
         }
-        anim.SetFloat("animSpeed", targetSpeed);
-        anim.SetBool("mirror", slot.mirror);
+        anim.SetFloat(StaticStrings.animSpeed, targetSpeed);
+        anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
     }
 
@@ -311,8 +312,8 @@ public class StateManager : MonoBehaviour
 
             canMove = false;
             inAction = true;
-            anim.SetBool("mirror", slot.mirror);
-            anim.CrossFade("parry_attack", 0.2f);
+            anim.SetBool(StaticStrings.mirror, slot.mirror);
+            anim.CrossFade(StaticStrings.parry_attack, 0.2f);
             return true;
         }   
 
@@ -344,17 +345,18 @@ public class StateManager : MonoBehaviour
 
         if (angle > 150)
         {
-            Vector3 targetPos = dir * parryOffset;
+            Vector3 targetPos = dir * backstabOffset;
             targetPos += backstabTarget.transform.position;
             transform.position = targetPos;
 
             backstabTarget.transform.rotation = transform.rotation;
-            backstabTarget.IsGettingParried();
+            backstabTarget.IsGettingBackstabbed();
 
             canMove = false;
             inAction = true;
-            anim.SetBool("mirror", slot.mirror);
-            anim.CrossFade("parry_attack", 0.2f);
+            anim.SetBool(StaticStrings.mirror, slot.mirror);
+            anim.CrossFade(StaticStrings.parry_attack, 0.2f);
+            lockonTarget = null;
             return true;
         }
 
@@ -384,7 +386,7 @@ public class StateManager : MonoBehaviour
             if (targetSpeed <= 0)
                 targetSpeed = 1;
         }
-        anim.SetBool("mirror", slot.mirror);
+        anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
     }
 
@@ -424,12 +426,12 @@ public class StateManager : MonoBehaviour
         }
 
 
-        anim.SetFloat("vertical", v);
-        anim.SetFloat("horizontal", h);
+        anim.SetFloat(StaticStrings.vertical, v);
+        anim.SetFloat(StaticStrings.horizontal, h);
 
         canMove = false;
         inAction = true;
-        anim.CrossFade("Rolls", 0.2f);
+        anim.CrossFade(StaticStrings.Rolls, 0.2f);
 
     }
 
@@ -437,13 +439,13 @@ public class StateManager : MonoBehaviour
     {
         delta = d;
         onGround = OnGround();
-        anim.SetBool("onGround", onGround);
+        anim.SetBool(StaticStrings.onGround, onGround);
     }
 
     void HandleMovementAnimations()
     {
-        anim.SetBool("run", run);
-        anim.SetFloat("horizontal", moveAmount, 0.4f, delta);
+        anim.SetBool(StaticStrings.run, run);
+        anim.SetFloat(StaticStrings.horizontal, moveAmount, 0.4f, delta);
     }
 
     void HandleLockonAnimations(Vector3 moveDir)
@@ -452,8 +454,8 @@ public class StateManager : MonoBehaviour
         float h = relativeDir.x;
         float v = relativeDir.z;
 
-        anim.SetFloat("vertical", v, 0.2f, delta);
-        anim.SetFloat("horizontal", h, 0.2f, delta);
+        anim.SetFloat(StaticStrings.vertical, v, 0.2f, delta);
+        anim.SetFloat(StaticStrings.horizontal, h, 0.2f, delta);
     }
 
     public bool OnGround()
@@ -477,7 +479,7 @@ public class StateManager : MonoBehaviour
 
     public void HandleTwoHanded()
     {
-        anim.SetBool("two_handed", isTwoHanded);
+        anim.SetBool(StaticStrings.two_handed, isTwoHanded);
         if (isTwoHanded)
             actionManager.UpdateActionsTwoHanded();
         else

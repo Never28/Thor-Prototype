@@ -21,6 +21,8 @@ public class EnemyTarget : MonoBehaviour {
         for (int i = 0; i < humanoidBones.Count; i++) {
             targets.Add(anim.GetBoneTransform(humanoidBones[i]));
         }
+
+        EnemyManager.singleton.enemyTargets.Add(this);
     }
 
     public Transform GetTarget(bool negative = false)

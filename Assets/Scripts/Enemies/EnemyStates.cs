@@ -81,7 +81,7 @@ public class EnemyStates : MonoBehaviour {
 
     void Update() {
         delta = Time.deltaTime;
-        canMove = anim.GetBool("canMove");
+        canMove = anim.GetBool(StaticStrings.canMove);
 
         if (dontDoAnything) {
             dontDoAnything = !canMove;
@@ -121,7 +121,7 @@ public class EnemyStates : MonoBehaviour {
     void DoAction() {
         anim.Play("oh_attack_1");
         anim.applyRootMotion = true;
-        anim.SetBool("canMove", false);
+        anim.SetBool(StaticStrings.canMove, false);
     }
 
     public void DoDamage(float v) {
@@ -132,7 +132,7 @@ public class EnemyStates : MonoBehaviour {
         isInvincible = true;
         anim.Play("damage_2");
         anim.applyRootMotion = true;
-        anim.SetBool("canMove", false);
+        anim.SetBool(StaticStrings.canMove, false);
     }
 
     public void CheckForParry(Transform target, StateManager st) {
@@ -149,7 +149,7 @@ public class EnemyStates : MonoBehaviour {
         isInvincible = true;
         anim.Play("attack_interrupt");
         anim.applyRootMotion = true;
-        anim.SetBool("canMove", false);
+        anim.SetBool(StaticStrings.canMove, false);
         //st.parryTarget = this;
         parriedBy = st;
         return;
@@ -158,7 +158,14 @@ public class EnemyStates : MonoBehaviour {
     public void IsGettingParried()
     {
         dontDoAnything = true;
-        anim.SetBool("canMove", false);
-        anim.Play("parry_received");
+        anim.SetBool(StaticStrings.canMove, false);
+        anim.Play(StaticStrings.parry_received);
+    }
+
+    public void IsGettingBackstabbed()
+    {
+        dontDoAnything = true;
+        anim.SetBool(StaticStrings.canMove, false);
+        anim.Play(StaticStrings.backstabbed);
     }
 }

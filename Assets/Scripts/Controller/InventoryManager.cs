@@ -27,8 +27,8 @@ public class InventoryManager : MonoBehaviour {
         string targetIdle = w.oh_idle;
         targetIdle += (isLeft) ? "_l" : "_r";
 
-        states.anim.SetBool("mirror", isLeft);
-        states.anim.Play("changeWeapon");
+        states.anim.SetBool(StaticStrings.mirror, isLeft);
+        states.anim.Play(StaticStrings.changeWeapon);
         states.anim.Play(targetIdle);
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
