@@ -33,6 +33,8 @@ public class InputHandler : MonoBehaviour
 
     void Start()
     {
+        UI.QuickSlot.singleton.Init();
+        
         states = GetComponent<StateManager>();
         states.Init();
 
