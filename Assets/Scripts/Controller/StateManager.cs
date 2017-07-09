@@ -127,7 +127,7 @@ public class StateManager : MonoBehaviour
         DetectAction();
         DetectItemAction();
 
-        inventoryManager.rightHandWeapon.instance.weaponModel.SetActive(!usingItem);
+        inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
 
         anim.SetBool(StaticStrings.blocking, isBlocking);
         anim.SetBool(StaticStrings.isLeft, isLeftHand);
@@ -507,11 +507,11 @@ public class StateManager : MonoBehaviour
             if (isRight)
             {
                 if (inventoryManager.leftHandWeapon)
-                    inventoryManager.leftHandWeapon.instance.weaponModel.SetActive(false);
+                    inventoryManager.leftHandWeapon.weaponModel.SetActive(false);
             }
             else {
                 if (inventoryManager.rightHandWeapon)
-                    inventoryManager.rightHandWeapon.instance.weaponModel.SetActive(false);
+                    inventoryManager.rightHandWeapon.weaponModel.SetActive(false);
             }
         }
         else{
@@ -523,12 +523,12 @@ public class StateManager : MonoBehaviour
             if (isRight)
             {
                 if (inventoryManager.leftHandWeapon)
-                    inventoryManager.leftHandWeapon.instance.weaponModel.SetActive(true);
+                    inventoryManager.leftHandWeapon.weaponModel.SetActive(true);
             }
             else
             {
                 if (inventoryManager.rightHandWeapon)
-                    inventoryManager.rightHandWeapon.instance.weaponModel.SetActive(true);
+                    inventoryManager.rightHandWeapon.weaponModel.SetActive(true);
             }
         }
 

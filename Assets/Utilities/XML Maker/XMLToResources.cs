@@ -52,6 +52,24 @@ namespace Utilities {
                 float.TryParse(backstabMultiplier.InnerText, out _w.backstabMultiplier);
                 XmlNode leftHandMirror = w.SelectSingleNode("leftHandMirror");
                 _w.leftHandMirror = leftHandMirror.InnerText == "True";
+                XmlNode model_pos_x = w.SelectSingleNode("model_pos_x");
+                float.TryParse(model_pos_x.InnerText, out _w.model_pos.x);
+                XmlNode model_pos_y = w.SelectSingleNode("model_pos_y");
+                float.TryParse(model_pos_y.InnerText, out _w.model_pos.y);
+                XmlNode model_pos_z = w.SelectSingleNode("model_pos_z");
+                float.TryParse(model_pos_z.InnerText, out _w.model_pos.z);
+                XmlNode model_eulers_x = w.SelectSingleNode("model_eulers_x");
+                float.TryParse(model_eulers_x.InnerText, out _w.model_eulers.x);
+                XmlNode model_eulers_y = w.SelectSingleNode("model_eulers_y");
+                float.TryParse(model_eulers_y.InnerText, out _w.model_eulers.y);
+                XmlNode model_eulers_z = w.SelectSingleNode("model_eulers_z");
+                float.TryParse(model_eulers_z.InnerText, out _w.model_eulers.z);
+                XmlNode model_scale_x = w.SelectSingleNode("model_scale_x");
+                float.TryParse(model_scale_x.InnerText, out _w.model_scale.x);
+                XmlNode model_scale_y = w.SelectSingleNode("model_scale_y");
+                float.TryParse(model_scale_y.InnerText, out _w.model_scale.y);
+                XmlNode model_scale_z = w.SelectSingleNode("model_scale_z");
+                float.TryParse(model_scale_z.InnerText, out _w.model_scale.z);
 
                 resourcesManager.weapons.Add(_w);
             }

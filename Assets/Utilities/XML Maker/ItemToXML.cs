@@ -35,9 +35,15 @@ namespace Utilities {
                 xml += "<parryMultiplier>" + w.parryMultiplier + "</parryMultiplier>" + "\n";
                 xml += "<backstabMultiplier>" + w.backstabMultiplier + "</backstabMultiplier>" + "\n";
                 xml += "<leftHandMirror>" + w.leftHandMirror + "</leftHandMirror>" + "\n";
-                xml += "<model_pos>" + w.model_pos + "</model_pos>" + "\n";
-                xml += "<model_eulers>" + w.model_eulers + "</model_eulers>" + "\n";
-                xml += "<model_scale>" + w.model_scale + "</model_scale>" + "\n";
+                xml += "<model_pos_x>" + w.model_pos.x + "</model_pos_x>";
+                xml += "<model_pos_y>" + w.model_pos.y + "</model_pos_y>";
+                xml += "<model_pos_z>" + w.model_pos.z + "</model_pos_z>" + "\n";
+                xml += "<model_eulers_x>" + w.model_eulers.x + "</model_eulers_x>";
+                xml += "<model_eulers_y>" + w.model_eulers.y + "</model_eulers_y>";
+                xml += "<model_eulers_z>" + w.model_eulers.z + "</model_eulers_z>" + "\n";
+                xml += "<model_scale_x>" + w.model_scale.x + "</model_scale_x>";
+                xml += "<model_scale_y>" + w.model_scale.y + "</model_scale_y>";
+                xml += "<model_scale_z>" + w.model_scale.z + "</model_scale_z>" + "\n";
                 xml += "</weapon>" + "\n";
 	        }
 
