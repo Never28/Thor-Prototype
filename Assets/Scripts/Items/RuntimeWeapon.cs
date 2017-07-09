@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemInstance : MonoBehaviour {
+public class RuntimeWeapon : MonoBehaviour {
 
     public Weapon instance;
     public GameObject weaponModel;

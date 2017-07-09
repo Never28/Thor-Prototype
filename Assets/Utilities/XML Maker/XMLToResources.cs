@@ -36,8 +36,8 @@ namespace Utilities {
                 Weapon _w = new Weapon();
                 _w.actions = new List<Action>();
                 _w.twoHandedActions = new List<Action>();
-                XmlNode weaponId = w.SelectSingleNode("weaponId");
-                _w.weaponId = weaponId.InnerText;
+                //XmlNode weaponId = w.SelectSingleNode("weaponId");
+                //_w.weaponId = weaponId.InnerText;
                 XmlNode oh_idle = w.SelectSingleNode("oh_idle");
                 _w.oh_idle = oh_idle.InnerText;
                 XmlNode th_idle = w.SelectSingleNode("th_idle");
@@ -52,7 +52,7 @@ namespace Utilities {
                 float.TryParse(backstabMultiplier.InnerText, out _w.backstabMultiplier);
                 XmlNode leftHandMirror = w.SelectSingleNode("leftHandMirror");
                 _w.leftHandMirror = leftHandMirror.InnerText == "True";
-                XmlNode model_pos_x = w.SelectSingleNode("model_pos_x");
+                /*XmlNode model_pos_x = w.SelectSingleNode("model_pos_x");
                 float.TryParse(model_pos_x.InnerText, out _w.model_pos.x);
                 XmlNode model_pos_y = w.SelectSingleNode("model_pos_y");
                 float.TryParse(model_pos_y.InnerText, out _w.model_pos.y);
@@ -69,9 +69,9 @@ namespace Utilities {
                 XmlNode model_scale_y = w.SelectSingleNode("model_scale_y");
                 float.TryParse(model_scale_y.InnerText, out _w.model_scale.y);
                 XmlNode model_scale_z = w.SelectSingleNode("model_scale_z");
-                float.TryParse(model_scale_z.InnerText, out _w.model_scale.z);
+                float.TryParse(model_scale_z.InnerText, out _w.model_scale.z);*/ 
 
-                resourcesManager.weapons.Add(_w);
+                //resourcesManager.weapons.Add(_w);
             }
         }
 

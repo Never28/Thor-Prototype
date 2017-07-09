@@ -4,29 +4,47 @@ using UnityEngine;
 
 public class ResourcesManager : MonoBehaviour {
 
-    public List<Weapon> weapons = new List<Weapon>();
-    Dictionary<string, int> weaponDictionary = new Dictionary<string, int>();
+    Dictionary<string, int> itemIds = new Dictionary<string, int>();
 
     public static ResourcesManager singleton;
     void Awake() {
         singleton = this;
+        LoadItemIds();
+    }
 
-        for (int i = 0; i < weapons.Count; i++)
+    void LoadItemIds() {
+        WeaponScriptableObject obj = Resources.Load("WeaponScriptableObject") as WeaponScriptableObject;
+
+        for (int i = 0; i < obj.weapons.Count; i++)
         {
-            if (string.IsNullOrEmpty(weapons[i].weaponId))
-                continue;
-            if (!weaponDictionary.ContainsKey(weapons[i].weaponId))
-                weaponDictionary.Add(weapons[i].weaponId, i);
-            else
-                Debug.Log(weapons[i].weaponId + " is a duplicated id");
+            if (itemIds.ContainsKey(obj.weapons[i].itemName))
+            {
+                Debug.Log("Item is a duplicate");
+            }
+            else {
+                itemIds.Add(obj.weapons[i].itemName, i);
+            }
         }
     }
 
-    public Weapon GetWeapon(string id) {
+    int GetItemIdFromString(string id) {
         int index = -1;
-        if (weaponDictionary.TryGetValue(id, out index)) {
-            return weapons[index];
+        if (itemIds.TryGetValue(id, out index)) {
+            return index;
         }
-        return null;
+        return -1;
+    }
+
+    public Weapon GetWeapon(string id) {
+
+        WeaponScriptableObject obj = Resources.Load("WeaponScriptableObject") as WeaponScriptableObject;
+
+        int index = GetItemIdFromString(id);
+
+        if (index == -1)
+            return null;
+
+        return obj.weapons[index];
+
     }
 }

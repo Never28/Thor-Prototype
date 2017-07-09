@@ -7,8 +7,8 @@ public class InventoryManager : MonoBehaviour {
     public List<string> rh_weapons;
     public List<string> lh_weapons;
 
-    public ItemInstance rightHandWeapon;
-    public ItemInstance leftHandWeapon;
+    public RuntimeWeapon rightHandWeapon;
+    public RuntimeWeapon leftHandWeapon;
     public bool hasLeftHandWeapon = true;
 
     public GameObject parryCollider;
@@ -19,10 +19,10 @@ public class InventoryManager : MonoBehaviour {
         states = st;
 
         if(rh_weapons.Count > 0)
-            rightHandWeapon = WeaponToItemInstance(ResourcesManager.singleton.GetWeapon(rh_weapons[0]));
+            rightHandWeapon = WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(rh_weapons[0]));
         if (lh_weapons.Count > 0)
         {
-            leftHandWeapon = WeaponToItemInstance(ResourcesManager.singleton.GetWeapon(lh_weapons[0]),true);
+            leftHandWeapon = WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(lh_weapons[0]),true);
             hasLeftHandWeapon = true;        
         }
 
@@ -41,7 +41,7 @@ public class InventoryManager : MonoBehaviour {
         CloseParryCollider();
     }
 
-    public void EquipWeapon(ItemInstance w, bool isLeft = false) {
+    public void EquipWeapon(RuntimeWeapon w, bool isLeft = false) {
         string targetIdle = w.instance.oh_idle;
         targetIdle += (isLeft) ? StaticStrings._l : StaticStrings._r;
 
@@ -92,9 +92,9 @@ public class InventoryManager : MonoBehaviour {
         parryCollider.SetActive(false);
     }
 
-    public ItemInstance WeaponToItemInstance(Weapon w, bool isLeft = false) {
+    public RuntimeWeapon WeaponToRuntimeWeapon(Weapon w, bool isLeft = false) {
         GameObject go = new GameObject();
-        ItemInstance inst = go.AddComponent<ItemInstance>();
+        RuntimeWeapon inst = go.AddComponent<RuntimeWeapon>();
 
         inst.instance = new Weapon();
         StaticFunctions.DeepCopyWeapon(w, inst.instance);
@@ -102,8 +102,17 @@ public class InventoryManager : MonoBehaviour {
         inst.weaponModel = Instantiate(inst.instance.modelPrefab) as GameObject;
         Transform p = states.anim.GetBoneTransform((isLeft) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
         inst.weaponModel.transform.parent = p;
-        inst.weaponModel.transform.localPosition = inst.instance.model_pos;
-        inst.weaponModel.transform.localEulerAngles = inst.instance.model_eulers;
+        if (isLeft)
+        {
+            inst.weaponModel.transform.localPosition = inst.instance.l_model_pos;
+            inst.weaponModel.transform.localEulerAngles = inst.instance.l_model_eulers;
+        }
+        else
+        {
+            inst.weaponModel.transform.localPosition = inst.instance.r_model_pos;
+            inst.weaponModel.transform.localEulerAngles = inst.instance.r_model_eulers;        
+        }
+
         inst.weaponModel.transform.localScale = inst.instance.model_scale;
 
         inst.w_hook = inst.weaponModel.GetComponentInChildren<WeaponHook>();
@@ -114,10 +123,15 @@ public class InventoryManager : MonoBehaviour {
 }
 
 [System.Serializable]
-public class Weapon
-{
-    public string weaponId;
+public class Item {
+    public string itemName;
+    public string itemDescription;
     public Sprite icon;
+}
+
+[System.Serializable]
+public class Weapon : Item
+{
     public string oh_idle;
     public string th_idle;
 
@@ -138,7 +152,9 @@ public class Weapon
         return null;
     }
 
-    public Vector3 model_pos;
-    public Vector3 model_eulers;
+    public Vector3 r_model_pos;
+    public Vector3 l_model_pos;
+    public Vector3 r_model_eulers;
+    public Vector3 l_model_eulers;
     public Vector3 model_scale;
 }

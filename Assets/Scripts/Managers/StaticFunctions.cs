@@ -5,7 +5,6 @@ using UnityEngine;
 public static class StaticFunctions {
 
     public static void DeepCopyWeapon(Weapon from, Weapon to) {
-        to.weaponId = from.weaponId;
         to.icon = from.icon;
         to.oh_idle = from.oh_idle;
         to.th_idle = from.th_idle;
@@ -31,8 +30,10 @@ public static class StaticFunctions {
         to.backstabMultiplier = from.backstabMultiplier;
         to.leftHandMirror = from.leftHandMirror;
         to.modelPrefab = from.modelPrefab;
-        to.model_pos = from.model_pos;
-        to.model_eulers = from.model_eulers;
+        to.r_model_pos = from.r_model_pos;
+        to.l_model_pos = from.l_model_pos;
+        to.r_model_eulers = from.r_model_eulers;
+        to.l_model_eulers = from.l_model_eulers;
         to.model_scale = from.model_scale;
     }
 

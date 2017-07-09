@@ -8,7 +8,7 @@ namespace Utilities {
     public class ItemToXML : MonoBehaviour
     {
         public bool make;
-        public List<ItemInstance> candidates = new List<ItemInstance>();
+        public List<RuntimeWeapon> candidates = new List<RuntimeWeapon>();
         public string xml_version = "<?xml version = \"1.0\" encoding = \"UTF-8\"?>";
         public string targetName;
 
@@ -21,11 +21,11 @@ namespace Utilities {
             xml += "\n";
             xml += "<root>";
 
-            foreach (ItemInstance item in candidates)
+            foreach (RuntimeWeapon item in candidates)
 	        {
                 Weapon w = item.instance;
                 xml += "<weapon>" + "\n";
-                xml += "<weaponId>" + w.weaponId + "</weaponId>" + "\n";
+                //xml += "<weaponId>" + w.weaponId + "</weaponId>" + "\n";
                 xml += "<oh_idle>" + w.oh_idle + "</oh_idle>" + "\n";
                 xml += "<th_idle>" + w.th_idle + "</th_idle>" + "\n";
 
@@ -35,7 +35,7 @@ namespace Utilities {
                 xml += "<parryMultiplier>" + w.parryMultiplier + "</parryMultiplier>" + "\n";
                 xml += "<backstabMultiplier>" + w.backstabMultiplier + "</backstabMultiplier>" + "\n";
                 xml += "<leftHandMirror>" + w.leftHandMirror + "</leftHandMirror>" + "\n";
-                xml += "<model_pos_x>" + w.model_pos.x + "</model_pos_x>";
+                /*xml += "<model_pos_x>" + w.model_pos.x + "</model_pos_x>";
                 xml += "<model_pos_y>" + w.model_pos.y + "</model_pos_y>";
                 xml += "<model_pos_z>" + w.model_pos.z + "</model_pos_z>" + "\n";
                 xml += "<model_eulers_x>" + w.model_eulers.x + "</model_eulers_x>";
@@ -43,7 +43,7 @@ namespace Utilities {
                 xml += "<model_eulers_z>" + w.model_eulers.z + "</model_eulers_z>" + "\n";
                 xml += "<model_scale_x>" + w.model_scale.x + "</model_scale_x>";
                 xml += "<model_scale_y>" + w.model_scale.y + "</model_scale_y>";
-                xml += "<model_scale_z>" + w.model_scale.z + "</model_scale_z>" + "\n";
+                xml += "<model_scale_z>" + w.model_scale.z + "</model_scale_z>" + "\n";*/
                 xml += "</weapon>" + "\n";
 	        }
 
