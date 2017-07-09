@@ -32,4 +32,10 @@ public static class ScriptableObjectManager {
     {
         ScriptableObjectManager.CreateAsset<WeaponScriptableObject>();
     }
+
+    [MenuItem("Assets/Inventory/CreateSpellItems")]
+    public static void CreateSpellItems()
+    {
+        ScriptableObjectManager.CreateAsset<SpellItemScriptableObject>(); 
+    }
 }

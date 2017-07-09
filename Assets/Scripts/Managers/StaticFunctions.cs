@@ -38,8 +38,11 @@ public static class StaticFunctions {
     }
 
     public static void DeepCopyActionToAction(Action a, Action w_a) {
+        a.input = w_a.input;
         a.targetAnim = w_a.targetAnim;
         a.type = w_a.type;
+        a.spellClass = w_a.spellClass;
+        a.canParry = w_a.canParry;
         a.canBeParried = w_a.canBeParried;
         a.changeSpeed = w_a.changeSpeed;
         a.animSpeed = w_a.animSpeed;
@@ -58,6 +61,7 @@ public static class StaticFunctions {
             return;
         a.targetAnim = w_a.targetAnim;
         a.type = w_a.type;
+        a.spellClass = w_a.spellClass;
         a.canBeParried = w_a.canBeParried;
         a.changeSpeed = w_a.changeSpeed;
         a.animSpeed = w_a.animSpeed;
@@ -85,6 +89,16 @@ public static class StaticFunctions {
         to.fire = from.fire;
         to.lightning = from.lightning;
         to.dark = from.dark;
+    }
+
+    public static void DeepCopySpell(Spell from, Spell to) {
+        to.itemName = from.itemName;
+        to.itemDescription = from.itemDescription;
+        to.icon = from.icon;
+        to.spellType = from.spellType;
+        to.projectile = from.projectile;
+        to.particlePrefab = from.particlePrefab;
+
     }
 
     public static Action GetAction(ActionInput input, List<Action> actions)

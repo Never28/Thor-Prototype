@@ -19,6 +19,18 @@ public class InputHandler : MonoBehaviour
     float lt_axis;
     bool lt_input;
 
+    float d_y;
+    float d_x;
+    bool d_up;
+    bool d_down;
+    bool d_left;
+    bool d_right;
+    bool prev_d_up;
+    bool prev_d_down;
+    bool prev_d_left;
+    bool prev_d_right;
+
+
     bool leftAxis_down;
     bool rightAxis_down;
 
@@ -81,7 +93,16 @@ public class InputHandler : MonoBehaviour
 
         if (b_input)
             b_timer += delta;
-    }
+
+        d_x = Input.GetAxis(StaticStrings.Pad_X);
+        d_y = Input.GetAxis(StaticStrings.Pad_Y);
+
+        d_up = Input.GetKeyUp(KeyCode.Alpha1) || d_y < 0;
+        d_down = Input.GetKeyUp(KeyCode.Alpha2) || d_y > 0;
+        d_left = Input.GetKeyUp(KeyCode.Alpha3) || d_x < 0;
+        d_right = Input.GetKeyUp(KeyCode.Alpha4) || d_x > 0;
+
+    } 
 
     void UpdateStates()
     {
@@ -90,7 +111,7 @@ public class InputHandler : MonoBehaviour
 
         Vector3 v = states.vertical * camManager.transform.forward;
         Vector3 h = states.horizontal * camManager.transform.right;
-        states.moveDir = (v + h).normalized;
+        states.moveDir = (v + h).normalized; 
         float m = Mathf.Abs(horizontal) + Mathf.Abs(vertical);
         states.moveAmount = Mathf.Clamp01(m);
 
@@ -148,6 +169,57 @@ public class InputHandler : MonoBehaviour
             camManager.lockonTransform = states.lockonTransform;
             camManager.lockOn = states.lockOn;
         }
+
+        HandleQuickSlotChanges();
+
+    }
+
+    void HandleQuickSlotChanges() {
+        
+        if (d_up)
+        {
+            if (!prev_d_up)
+            {
+                states.inventoryManager.ChangeToNextSpell();
+                prev_d_up = true;
+
+            }
+        }
+
+        if (!states.canMove)
+            return;
+        if (!d_up)
+            prev_d_up = false;
+
+        if (states.isTwoHanded)
+            return;
+
+        if (d_left)
+        {
+            if (!prev_d_left)
+            {
+                states.inventoryManager.ChangeToNextWeapon(true);
+                prev_d_left = true;
+
+            }
+        }
+        if (d_right)
+        {
+            if (!prev_d_right)
+            {
+                states.inventoryManager.ChangeToNextWeapon(false);
+                prev_d_right = true;
+
+            }
+        }
+
+
+        if (!d_down)
+            prev_d_down = false;
+        if (!d_left)
+            prev_d_left = false;
+        if (!d_right)
+            prev_d_right = false;
     }
 
     void ResetInputAndStates() {
