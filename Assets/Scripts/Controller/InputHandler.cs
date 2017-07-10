@@ -175,7 +175,8 @@ public class InputHandler : MonoBehaviour
     }
 
     void HandleQuickSlotChanges() {
-        
+        if (states.isSpellCasting || states.usingItem)
+            return;
         if (d_up)
         {
             if (!prev_d_up)

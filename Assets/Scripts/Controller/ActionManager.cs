@@ -132,6 +132,14 @@ public class Action {
 }
 
 [System.Serializable]
+public class SpellAction {
+    public ActionInput input;
+    public string targetAnim;
+    public string throwAnim;
+    public float castTime;
+}
+
+[System.Serializable]
 public class ItemAction {
     public string targetAnim;
     public string itemId;

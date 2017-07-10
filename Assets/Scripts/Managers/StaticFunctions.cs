@@ -96,9 +96,24 @@ public static class StaticFunctions {
         to.itemDescription = from.itemDescription;
         to.icon = from.icon;
         to.spellType = from.spellType;
+        to.spellClass = from.spellClass;
         to.projectile = from.projectile;
         to.particlePrefab = from.particlePrefab;
 
+        to.spellActions = new List<SpellAction>();
+        for (int i = 0; i < from.spellActions.Count; i++)
+        {
+            SpellAction a = new SpellAction();
+            DeepCopySpellActionToSpellAction(a, from.spellActions[i]);
+            to.spellActions.Add(a);
+        }
+    }
+
+    public static void DeepCopySpellActionToSpellAction(SpellAction to, SpellAction from) {
+        to.input = from.input;
+        to.targetAnim = from.targetAnim;
+        to.throwAnim = from.throwAnim;
+        to.castTime = from.castTime;
     }
 
     public static Action GetAction(ActionInput input, List<Action> actions)

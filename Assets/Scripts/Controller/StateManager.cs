@@ -36,6 +36,7 @@ public class StateManager : MonoBehaviour
     public bool lockOn;
     public bool inAction;
     public bool canMove;
+    public bool isSpellCasting;
     public bool isTwoHanded;
     public bool usingItem;
     public bool canBeParried;
@@ -123,6 +124,7 @@ public class StateManager : MonoBehaviour
 
         isBlocking = false;
         usingItem = anim.GetBool(StaticStrings.interacting);
+        anim.SetBool(StaticStrings.spellCasting, isSpellCasting);
 
         DetectAction();
         DetectItemAction();
@@ -155,8 +157,6 @@ public class StateManager : MonoBehaviour
         }
 
         //a_hook.rootMotionMultiplier = 1;
-        a_hook.CloseRoll();
-        HandleRolls();
 
         anim.applyRootMotion = false;
 
@@ -164,7 +164,7 @@ public class StateManager : MonoBehaviour
 
         float targetSpeed = moveSpeed;
 
-        if (usingItem) {
+        if (usingItem || isSpellCasting) {
             run = false;
             moveAmount = Mathf.Clamp(moveAmount, 0, 0.5f);
         }
@@ -179,18 +179,7 @@ public class StateManager : MonoBehaviour
             lockOn = false;
 
 
-        Vector3 targetDir = (lockOn == false) ? moveDir : 
-             (lockonTransform != null) ? 
-             lockonTransform.position - transform.position : 
-             moveDir;
-        targetDir.y = 0;
-        if (targetDir == Vector3.zero)
-        {
-            targetDir = transform.forward;
-        }
-        Quaternion tr = Quaternion.LookRotation(targetDir);
-        Quaternion targetRotation = Quaternion.Slerp(transform.rotation, tr, delta * moveAmount * rotationSpeed);
-        transform.rotation = targetRotation;
+        HandleRotation();
 
         anim.SetBool(StaticStrings.lockon, lockOn);
 
@@ -202,6 +191,30 @@ public class StateManager : MonoBehaviour
         {
             HandleMovementAnimations();
         }
+
+        if (isSpellCasting) {
+            HandleSpellCasting();
+            return;
+        }
+
+
+        a_hook.CloseRoll();
+        HandleRolls();
+    }
+
+    void HandleRotation() {
+        Vector3 targetDir = (lockOn == false) ? moveDir :
+         (lockonTransform != null) ?
+         lockonTransform.position - transform.position :
+         moveDir;
+        targetDir.y = 0;
+        if (targetDir == Vector3.zero)
+        {
+            targetDir = transform.forward;
+        }
+        Quaternion tr = Quaternion.LookRotation(targetDir);
+        Quaternion targetRotation = Quaternion.Slerp(transform.rotation, tr, delta * moveAmount * rotationSpeed);
+        transform.rotation = targetRotation;
     }
 
     public void DetectItemAction() {
@@ -222,7 +235,7 @@ public class StateManager : MonoBehaviour
 
     public void DetectAction()
     {
-        if (!canMove || usingItem)
+        if (!canMove || usingItem || isSpellCasting)
             return;
 
         if (!rb && !rt && !lt && !!!lb)
@@ -241,6 +254,7 @@ public class StateManager : MonoBehaviour
                 BlockAction(slot);
                 break;
             case ActionType.spell:
+                SpellAction(slot);
                 break;
             case ActionType.parry:
                 ParryAction(slot);
@@ -277,6 +291,86 @@ public class StateManager : MonoBehaviour
         anim.SetFloat(StaticStrings.animSpeed, targetSpeed);
         anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
+    }
+
+    void SpellAction(Action slot) {
+
+
+        if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass) {
+            //targetAnim = cant cast spell
+            Debug.Log("Spell class doesn't match");
+        }
+
+        ActionInput inp = actionManager.GetActionInput(this);
+        if (inp == ActionInput.lb)
+            inp = ActionInput.rb;
+        if (inp == ActionInput.lt)
+            inp = ActionInput.rt;
+        
+        Spell s_inst = inventoryManager.currentSpell.instance;
+        SpellAction s_slot = s_inst.GetAction(s_inst.spellActions, inp);
+        if (s_slot == null)
+            return;
+
+        isSpellCasting = true;
+        spellCastTime = 0;
+        maxSpellCastTime = s_slot.castTime;
+        spellTargetAnim = s_slot.throwAnim;
+        spellIsMirrored = slot.mirror;
+
+        string targetAnim = s_slot.targetAnim;
+        if (spellIsMirrored)
+            targetAnim += StaticStrings._l;
+        else
+            targetAnim += StaticStrings._r;
+
+        projectileCandidate = inventoryManager.currentSpell.instance.projectile;
+        inventoryManager.CreateSpellParticle(inventoryManager.currentSpell, spellIsMirrored);
+
+        anim.SetBool(StaticStrings.spellCasting, true);
+        anim.SetBool(StaticStrings.mirror, slot.mirror);
+        anim.CrossFade(targetAnim, 0.2f);
+    }
+
+    float spellCastTime;
+    float maxSpellCastTime;
+    string spellTargetAnim;
+    bool spellIsMirrored;
+    GameObject projectileCandidate;
+
+    void HandleSpellCasting() {
+        spellCastTime += delta;
+        if (inventoryManager.currentSpell.currentParticle != null)
+            inventoryManager.currentSpell.currentParticle.SetActive(true);
+    
+        if (spellCastTime > maxSpellCastTime) {
+            canMove = false;
+            inAction = true;
+            isSpellCasting = false;
+
+            string targetAnim = spellTargetAnim;
+            anim.SetBool(StaticStrings.mirror, spellIsMirrored);
+            anim.CrossFade(targetAnim, 0.2f);
+        }
+    }
+
+    public void ThrowProjectile() {
+        if (projectileCandidate == null)
+            return;
+        GameObject go = Instantiate(projectileCandidate) as GameObject;
+        Transform p = anim.GetBoneTransform((spellIsMirrored) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+        go.transform.position = p.position;
+
+        if (lockonTransform && lockOn)
+        {
+            go.transform.LookAt(lockonTransform.position);
+        }
+        else {
+            go.transform.rotation = transform.rotation;
+        }
+
+        Projectile proj = go.GetComponent<Projectile>();
+        proj.Init();
     }
 
     bool CheckForParry(Action slot) {
@@ -490,7 +584,7 @@ public class StateManager : MonoBehaviour
         return r;
     }
 
-    public void HandleTwoHanded()
+    public void HandleTwoHanded() 
     {
         bool isRight = true;
         Weapon w = inventoryManager.rightHandWeapon.instance;

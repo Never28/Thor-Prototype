@@ -195,7 +195,7 @@ public class InventoryManager : MonoBehaviour {
         return inst;
     }
 
-    public RuntimeSpellItem SpellToRuntimeSpell(Spell s) {
+    public RuntimeSpellItem SpellToRuntimeSpell(Spell s, bool isLeft = false) {
         GameObject go = new GameObject();
         RuntimeSpellItem inst = go.AddComponent<RuntimeSpellItem>();
 
@@ -203,8 +203,20 @@ public class InventoryManager : MonoBehaviour {
         StaticFunctions.DeepCopySpell(s, inst.instance);
         go.name = s.itemName;
 
+
         r_spells.Add(inst);
         return inst;
+    }
+
+    public void CreateSpellParticle(RuntimeSpellItem inst, bool isLeft = false) {
+        if (inst.currentParticle == null)
+            inst.currentParticle = Instantiate(inst.instance.particlePrefab) as GameObject;
+
+        Transform p = states.anim.GetBoneTransform((isLeft) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+        inst.currentParticle.transform.parent = p;
+        inst.currentParticle.transform.localRotation = Quaternion.identity;
+        inst.currentParticle.transform.localPosition = Vector3.zero;
+        inst.currentParticle.SetActive(false);
     }
 
     public void ChangeToNextWeapon(bool isLeft) {
@@ -256,6 +268,8 @@ public class Item {
     public string itemName;
     public string itemDescription;
     public Sprite icon;
+
+
 }
 
 [System.Serializable]
@@ -272,7 +286,17 @@ public class Weapon : Item
 
     public GameObject modelPrefab;
 
-    public Action GetAction(List<Action> l, ActionInput input) {
+    public Vector3 r_model_pos;
+    public Vector3 l_model_pos;
+    public Vector3 r_model_eulers;
+    public Vector3 l_model_eulers;
+    public Vector3 model_scale;
+
+    public Action GetAction(List<Action> l, ActionInput input)
+    {
+        if (l == null)
+            return null;
+
         for (int i = 0; i < l.Count; i++)
         {
             if (l[i].input == input)
@@ -280,18 +304,28 @@ public class Weapon : Item
         }
         return null;
     }
-
-    public Vector3 r_model_pos;
-    public Vector3 l_model_pos;
-    public Vector3 r_model_eulers;
-    public Vector3 l_model_eulers;
-    public Vector3 model_scale;
 }
 
 [System.Serializable]
 public class Spell : Item {
     public SpellType spellType;
+    public SpellClass spellClass;
+    public List<SpellAction> spellActions = new List<SpellAction>(); 
     public GameObject projectile;
     public GameObject particlePrefab;
+
+
+    public SpellAction GetAction(List<SpellAction> l, ActionInput input)
+    {
+        if (l == null)
+            return null;
+
+        for (int i = 0; i < l.Count; i++)
+        {
+            if (l[i].input == input)
+                return l[i];
+        }
+        return null;
+    }
 }
 

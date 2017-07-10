@@ -33,6 +33,7 @@ public static class StaticStrings
     public static string isLeft = "isLeft";
     public static string canMove = "canMove";
     public static string lockon = "lockon";
+    public static string spellCasting = "spellCasting";
 
     //Animator States
     public static string Rolls = "Rolls";
