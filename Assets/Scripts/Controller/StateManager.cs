@@ -312,11 +312,14 @@ public class StateManager : MonoBehaviour
         if (s_slot == null)
             return;
 
+        SpellEffectManager.singleton.UseSpellEffect(s_inst.spell_effect, this);
+
         isSpellCasting = true;
         spellCastTime = 0;
         maxSpellCastTime = s_slot.castTime;
         spellTargetAnim = s_slot.throwAnim;
         spellIsMirrored = slot.mirror;
+        curSpellType = s_inst.spellType;
 
         string targetAnim = s_slot.targetAnim;
         if (spellIsMirrored)
@@ -325,20 +328,48 @@ public class StateManager : MonoBehaviour
             targetAnim += StaticStrings._r;
 
         projectileCandidate = inventoryManager.currentSpell.instance.projectile;
-        inventoryManager.CreateSpellParticle(inventoryManager.currentSpell, spellIsMirrored);
+        inventoryManager.CreateSpellParticle(inventoryManager.currentSpell, spellIsMirrored, s_inst.spellType == SpellType.looping);
 
         anim.SetBool(StaticStrings.spellCasting, true);
         anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
+
+        if (spellCast_Start != null)
+            spellCast_Start();
     }
 
     float spellCastTime;
     float maxSpellCastTime;
     string spellTargetAnim;
     bool spellIsMirrored;
+    SpellType curSpellType;
     GameObject projectileCandidate;
 
+    public delegate void SpellCast_Start();
+    public delegate void SpellCast_Loop();
+    public delegate void SpellCast_Stop();
+    public SpellCast_Start spellCast_Start;
+    public SpellCast_Loop spellCast_Loop;
+    public SpellCast_Stop spellCast_Stop;
+
     void HandleSpellCasting() {
+
+        if (curSpellType == SpellType.looping) {
+
+            if (spellCast_Loop != null)
+                spellCast_Loop();
+
+            if (rb == false && lb == false)
+            {
+                isSpellCasting = false;
+
+                if (spellCast_Stop != null)
+                    spellCast_Stop();
+
+            }
+            return;
+        }
+
         spellCastTime += delta;
         if (inventoryManager.currentSpell.currentParticle != null)
             inventoryManager.currentSpell.currentParticle.SetActive(true);
@@ -630,5 +661,9 @@ public class StateManager : MonoBehaviour
 
     public void IsGettingParried() { 
         
+    }
+
+    public void AddHealth() {
+        characterStats.hp++;
     }
 }

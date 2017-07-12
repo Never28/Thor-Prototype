@@ -11,6 +11,8 @@ public class Projectile : MonoBehaviour {
 
     public Transform target;
 
+    public GameObject explosionPrefab;
+
     public void Init() {
         rigid = GetComponent<Rigidbody>();
 
@@ -18,5 +20,14 @@ public class Projectile : MonoBehaviour {
         targetForce += transform.up * vSpeed;
         rigid.AddForce(targetForce, ForceMode.Impulse);
     }
- 
+
+    public void OnTriggerEnter(Collider other) {
+        EnemyStates es = other.GetComponentInParent<EnemyStates>();
+        if(es != null){
+            es.health -= 40;
+            es.DoDamage_();
+        }
+        GameObject go = Instantiate(explosionPrefab, transform.position, transform.rotation) as GameObject;
+        Destroy(this.gameObject);
+    }
 }

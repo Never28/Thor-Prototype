@@ -159,6 +159,12 @@ public class EnemyStates : MonoBehaviour {
         anim.SetBool(StaticStrings.canMove, false);
     }
 
+    public void DoDamage_() {
+        if (isInvincible)
+            return;
+        anim.Play("damage_3");
+    }
+
     public void CheckForParry(Transform target, StateManager st) {
         if (!canBeParried || !parryIsOn || isInvincible)
             return;

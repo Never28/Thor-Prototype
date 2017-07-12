@@ -21,6 +21,8 @@ public class InventoryManager : MonoBehaviour {
     public bool hasLeftHandWeapon = true;
 
     public GameObject parryCollider;
+    public GameObject breathCollider;
+    public GameObject blockCollider;
 
     StateManager states;
 
@@ -32,6 +34,8 @@ public class InventoryManager : MonoBehaviour {
         ParryCollider pr = parryCollider.GetComponent < ParryCollider>();
         pr.Init(st);
         CloseParryCollider();
+        CloseBreathCollider();
+        CloseBlockCollider();
     }
 
     public void LoadInventory() { 
@@ -208,15 +212,25 @@ public class InventoryManager : MonoBehaviour {
         return inst;
     }
 
-    public void CreateSpellParticle(RuntimeSpellItem inst, bool isLeft = false) {
-        if (inst.currentParticle == null)
+    public void CreateSpellParticle(RuntimeSpellItem inst, bool isLeft = false, bool parentUnderRoot = false) {
+        if (inst.currentParticle == null) {
             inst.currentParticle = Instantiate(inst.instance.particlePrefab) as GameObject;
+            inst.p_hook = inst.currentParticle.GetComponentInChildren<ParticleHook>();
+            inst.p_hook.Init();
+        }
 
-        Transform p = states.anim.GetBoneTransform((isLeft) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
-        inst.currentParticle.transform.parent = p;
-        inst.currentParticle.transform.localRotation = Quaternion.identity;
-        inst.currentParticle.transform.localPosition = Vector3.zero;
-        inst.currentParticle.SetActive(false);
+        if (parentUnderRoot)
+        {
+            Transform p = states.anim.GetBoneTransform((isLeft) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+            inst.currentParticle.transform.parent = p;
+            inst.currentParticle.transform.localRotation = Quaternion.identity;
+            inst.currentParticle.transform.localPosition = Vector3.zero;
+        }
+        else {
+            inst.currentParticle.transform.parent = transform;
+            inst.currentParticle.transform.localRotation = Quaternion.identity;
+            inst.currentParticle.transform.localPosition = new Vector3(0, 1.5f, .9f);
+        }
     }
 
     public void ChangeToNextWeapon(bool isLeft) {
@@ -261,6 +275,29 @@ public class InventoryManager : MonoBehaviour {
 
         EquipSpell(r_spells[s_index]);
     }
+    
+    #region Delegate Calls
+    
+    public void OpenBreathCollider() {
+        breathCollider.SetActive(true);
+    }
+
+    public void CloseBreathCollider() {
+        breathCollider.SetActive(false);
+    }
+
+    public void OpenBlockCollider() {
+        breathCollider.SetActive(true);
+    }
+
+    public void CloseBlockCollider() {
+        breathCollider.SetActive(false);
+    }
+
+    public void EmitSpellParticle() {
+        currentSpell.p_hook.Emit(1); 
+    }
+    #endregion
 }
 
 [System.Serializable]
@@ -313,6 +350,7 @@ public class Spell : Item {
     public List<SpellAction> spellActions = new List<SpellAction>(); 
     public GameObject projectile;
     public GameObject particlePrefab;
+    public string spell_effect;
 
 
     public SpellAction GetAction(List<SpellAction> l, ActionInput input)

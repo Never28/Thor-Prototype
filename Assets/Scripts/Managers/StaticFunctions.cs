@@ -98,6 +98,7 @@ public static class StaticFunctions {
         to.spellType = from.spellType;
         to.spellClass = from.spellClass;
         to.projectile = from.projectile;
+        to.spell_effect = from.spell_effect;
         to.particlePrefab = from.particlePrefab;
 
         to.spellActions = new List<SpellAction>();
