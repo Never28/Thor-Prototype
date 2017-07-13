@@ -37,6 +37,7 @@ public class StateManager : MonoBehaviour
     public bool inAction;
     public bool canMove;
     public bool isSpellCasting;
+    public bool enableIK;
     public bool isTwoHanded;
     public bool usingItem;
     public bool canBeParried;
@@ -134,6 +135,14 @@ public class StateManager : MonoBehaviour
         anim.SetBool(StaticStrings.blocking, isBlocking);
         anim.SetBool(StaticStrings.isLeft, isLeftHand);
 
+        if (!isBlocking && !isSpellCasting)
+        {
+            enableIK = false; //commentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
+        }
+
+        a_hook.useIK = enableIK; //commentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
+        //a_hook.useIK = true; //scommentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
+
         if (inAction)
         {
             anim.applyRootMotion = true;
@@ -196,8 +205,7 @@ public class StateManager : MonoBehaviour
             HandleSpellCasting();
             return;
         }
-
-
+        
         a_hook.CloseRoll();
         HandleRolls();
     }
@@ -215,6 +223,8 @@ public class StateManager : MonoBehaviour
         Quaternion tr = Quaternion.LookRotation(targetDir);
         Quaternion targetRotation = Quaternion.Slerp(transform.rotation, tr, delta * moveAmount * rotationSpeed);
         transform.rotation = targetRotation;
+
+        isBlocking = false;
     }
 
     public void DetectItemAction() {
@@ -334,6 +344,8 @@ public class StateManager : MonoBehaviour
         anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
 
+        a_hook.InitIKForBreathSpell(spellIsMirrored);
+
         if (spellCast_Start != null)
             spellCast_Start();
     }
@@ -356,12 +368,17 @@ public class StateManager : MonoBehaviour
 
         if (curSpellType == SpellType.looping) {
 
+            enableIK = true;
+            a_hook.currentHand = (spellIsMirrored) ? AvatarIKGoal.LeftHand : AvatarIKGoal.RightHand;
+
             if (spellCast_Loop != null)
                 spellCast_Loop();
 
             if (rb == false && lb == false)
             {
                 isSpellCasting = false;
+
+                enableIK = false;
 
                 if (spellCast_Stop != null)
                     spellCast_Stop();
@@ -503,7 +520,10 @@ public class StateManager : MonoBehaviour
 
     void BlockAction(Action slot) {
         isBlocking = true;
+        enableIK = true;
         isLeftHand = slot.mirror;
+        a_hook.currentHand = (slot.mirror) ? AvatarIKGoal.LeftHand : AvatarIKGoal.RightHand;
+        a_hook.InitIKForShield(slot.mirror); 
     }
 
     void ParryAction(Action slot)

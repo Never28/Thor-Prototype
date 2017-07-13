@@ -8,6 +8,7 @@ public class BreathCollider : MonoBehaviour {
         EnemyStates es = other.GetComponentInParent<EnemyStates>();
         if (es != null) {
             es.DoDamage_();
+            SpellEffectManager.singleton.UseSpellEffect("onfire", null, es);
         }
     }
 }

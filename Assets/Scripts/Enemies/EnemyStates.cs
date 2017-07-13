@@ -28,6 +28,9 @@ public class EnemyStates : MonoBehaviour {
     List<Rigidbody> ragdollRigids = new List<Rigidbody>();
     List<Collider> ragdollColliders = new List<Collider>();
 
+    public delegate void SpellEffect_Loop();
+    public SpellEffect_Loop spellEffect_Loop;
+
     float timer;
 
     void Start()
@@ -86,6 +89,10 @@ public class EnemyStates : MonoBehaviour {
     void Update() {
         delta = Time.deltaTime;
         canMove = anim.GetBool(StaticStrings.canMove);
+
+        if (spellEffect_Loop != null) {
+            spellEffect_Loop();
+        }
 
         if (dontDoAnything) {
             dontDoAnything = !canMove;
@@ -201,5 +208,23 @@ public class EnemyStates : MonoBehaviour {
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);
         anim.Play(StaticStrings.backstabbed);
+    }
+
+    public ParticleSystem fireParticle;
+    float _t;
+
+    public void OnFire() {
+        if (fireParticle == null)
+            return;
+
+        if (_t < 3)
+        {
+            _t += Time.deltaTime;
+            fireParticle.Emit(1);
+        }
+        else {
+            _t = 0;
+            spellEffect_Loop = null;
+        }
     }
 }

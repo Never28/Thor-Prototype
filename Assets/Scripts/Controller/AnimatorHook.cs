@@ -16,6 +16,18 @@ public class AnimatorHook : MonoBehaviour
     float delta;
     AnimationCurve rollCurve;
 
+    //ik for breath spell
+    public Transform ikTarget;
+    public Transform bodyTarget;
+    public Transform headTarget;
+    //ik for shield block
+    public Transform ikTargetShield;
+    public Transform bodyTargetShield;
+
+    IKHandler ik_handler;
+    public bool useIK;
+    public AvatarIKGoal currentHand;
+
     public void Init(StateManager st, EnemyStates eSt)
     {
         states = st;
@@ -32,6 +44,9 @@ public class AnimatorHook : MonoBehaviour
             delta = eSt.delta;
         }
 
+        ik_handler = gameObject.GetComponent<IKHandler>();
+        if(ik_handler != null)
+            ik_handler.Init(anim);
     }
 
     public void InitForRoll()
@@ -51,6 +66,9 @@ public class AnimatorHook : MonoBehaviour
 
     void OnAnimatorMove()
     {
+        if (ik_handler != null)
+            ik_handler.OnAnimatorMoveTick(currentHand == AvatarIKGoal.LeftHand);
+        
         if (states == null && eStates == null)
             return;
 
@@ -99,6 +117,30 @@ public class AnimatorHook : MonoBehaviour
             rigid.velocity = v2;
         }
 
+    }
+     
+    void OnAnimatorIK() {
+        if (ik_handler == null)
+            return;
+
+        if (!useIK) {
+            if (ik_handler.weight > 0)
+            {
+                ik_handler.Tick(currentHand, 0);
+            }
+            else {
+                ik_handler.weight = 0;
+            }
+        }
+        else
+        {
+            ik_handler.Tick(currentHand, 1);
+        }
+    }
+
+    void LateUpdate() {
+        if(ik_handler != null)
+            ik_handler.LateTick();
     }
 
     public void OpenDamageColliders() {
@@ -151,5 +193,14 @@ public class AnimatorHook : MonoBehaviour
         if (states) {
             states.ThrowProjectile();
         }
+    }
+
+    public void InitIKForShield(bool isLeft) {
+        ik_handler.UpdateIKTargets((isLeft) ? IKSnapshotType.shield_l : IKSnapshotType.shield_r, isLeft);
+    }
+
+    public void InitIKForBreathSpell(bool isLeft)
+    {
+        ik_handler.UpdateIKTargets(IKSnapshotType.breath, isLeft);
     }
 }

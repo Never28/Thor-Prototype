@@ -26,6 +26,7 @@ public class Projectile : MonoBehaviour {
         if(es != null){
             es.health -= 40;
             es.DoDamage_();
+            SpellEffectManager.singleton.UseSpellEffect("onfire", null, es);
         }
         GameObject go = Instantiate(explosionPrefab, transform.position, transform.rotation) as GameObject;
         Destroy(this.gameObject);

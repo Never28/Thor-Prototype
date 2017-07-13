@@ -28,6 +28,9 @@ public class SpellEffectManager : MonoBehaviour {
             case 3:
                 FireBall(c);
                 break;
+            case 4:
+                OnFire(c, e);
+                break;
         }
     }
 
@@ -59,6 +62,14 @@ public class SpellEffectManager : MonoBehaviour {
         c.spellCast_Loop = c.inventoryManager.EmitSpellParticle;
     }
 
+    void OnFire(StateManager c, EnemyStates e) {
+        if (c != null) { 
+        }
+        if (e != null) {
+            e.spellEffect_Loop = e.OnFire;
+        }
+    }
+
     public static SpellEffectManager singleton;
     void Awake() {
         singleton = this;
@@ -67,5 +78,6 @@ public class SpellEffectManager : MonoBehaviour {
         spellEffects.Add("darkshield", 1);
         spellEffects.Add("healingsmall", 2);
         spellEffects.Add("fireball", 3);
+        spellEffects.Add("onfire", 4);
     }
 }
