@@ -120,6 +120,9 @@ public class Action {
     public float animSpeed = 1.0f;
     public bool canBackstab = true;
     public bool canParry = true;
+    public float staminaCost = 5;
+    public int focusCost = 0;
+
     [HideInInspector]
     public float parryMultiplier;
     [HideInInspector]
@@ -127,8 +130,6 @@ public class Action {
 
     public bool overrideDamageAnim;
     public string damageAnim;
-
-    public WeaponStats weaponStats;
 }
 
 [System.Serializable]

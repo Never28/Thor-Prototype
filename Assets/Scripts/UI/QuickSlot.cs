@@ -6,6 +6,7 @@ using UnityEngine.UI;
 namespace UI {
     public class QuickSlot : MonoBehaviour
     {
+
         public List<QSlot> slots;
 
         public void Init() {

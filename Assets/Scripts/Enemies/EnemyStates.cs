@@ -139,11 +139,11 @@ public class EnemyStates : MonoBehaviour {
         anim.SetBool(StaticStrings.canMove, false);
     }
 
-    public void DoDamage(Action a) {
+    public void DoDamage(Action a, Weapon w) {
         if (isInvincible)
             return;
 
-        int damage = StatsCalculations.CalculateBaseDamage(a.weaponStats, characterStats);
+        int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats);
         
         characterStats.poise += damage;
         health -= damage;
@@ -192,18 +192,18 @@ public class EnemyStates : MonoBehaviour {
         return;
     }
 
-    public void IsGettingParried(Action a)
+    public void IsGettingParried(Action a, Weapon w)
     {
-        int damage = StatsCalculations.CalculateBaseDamage(a.weaponStats, characterStats, a.parryMultiplier);
+        int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats, a.parryMultiplier);
         health -= damage;
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);
         anim.Play(StaticStrings.parry_received);
     }
 
-    public void IsGettingBackstabbed(Action a)
+    public void IsGettingBackstabbed(Action a, Weapon w)
     {
-        int damage = StatsCalculations.CalculateBaseDamage(a.weaponStats, characterStats, a.backstabMultiplier);
+        int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats, a.backstabMultiplier);
         health -= damage;
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);

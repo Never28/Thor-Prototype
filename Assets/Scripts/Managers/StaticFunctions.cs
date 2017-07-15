@@ -13,7 +13,6 @@ public static class StaticFunctions {
         for (int i = 0; i < from.actions.Count; i++)
         {
             Action a = new Action();
-            a.weaponStats = new WeaponStats();
             DeepCopyActionToAction(a, from.actions[i]);
             to.actions.Add(a);
         }
@@ -21,7 +20,6 @@ public static class StaticFunctions {
         for (int i = 0; i < from.twoHandedActions.Count; i++)
         {
             Action a = new Action();
-            a.weaponStats = new WeaponStats();
             DeepCopyActionToAction(a, from.twoHandedActions[i]);
             to.actions.Add(a);
         }
@@ -35,6 +33,9 @@ public static class StaticFunctions {
         to.r_model_eulers = from.r_model_eulers;
         to.l_model_eulers = from.l_model_eulers;
         to.model_scale = from.model_scale;
+
+        to.weaponStats = new WeaponStats();
+        DeepCopyWeaponStats(from.weaponStats, to.weaponStats);
     }
 
     public static void DeepCopyActionToAction(Action a, Action w_a) {
@@ -49,8 +50,6 @@ public static class StaticFunctions {
         a.canBackstab = w_a.canBackstab;
         a.overrideDamageAnim = w_a.overrideDamageAnim;
         a.damageAnim = w_a.damageAnim;
-
-        DeepCopyWeaponStats(w_a.weaponStats, a.weaponStats);
     }
 
     public static void DeepCopyAction(Weapon w, ActionInput input, ActionInput assign, List<Action> actionList, bool isLeftHand = false)
@@ -75,8 +74,6 @@ public static class StaticFunctions {
         {
             a.mirror = true;
         }
-
-        DeepCopyWeaponStats(w_a.weaponStats, a.weaponStats);
     }
 
     public static void DeepCopyWeaponStats(WeaponStats from, WeaponStats to)

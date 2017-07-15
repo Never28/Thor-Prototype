@@ -40,6 +40,7 @@ public class InputHandler : MonoBehaviour
 
     StateManager states;
     CameraManager camManager;
+    UIManager uiManager;
 
     float delta;
 
@@ -52,6 +53,8 @@ public class InputHandler : MonoBehaviour
 
         camManager = CameraManager.singleton;
         camManager.Init(states);
+
+        uiManager = UIManager.singleton;
     }
 
     void FixedUpdate()
@@ -67,8 +70,9 @@ public class InputHandler : MonoBehaviour
     {
         delta = Time.deltaTime;
         states.Tick(delta);
-
         ResetInputAndStates();
+        states.MonitorStats();
+        uiManager.Tick(states.characterStats, delta);
     }
 
     void GetInput()
@@ -120,7 +124,7 @@ public class InputHandler : MonoBehaviour
 
         if (b_input && b_timer > 0.5f)
         {
-            states.run = (states.moveAmount > 0);
+            states.run = (states.moveAmount > 0) && states.characterStats._stamina > 0;
         }
 
         if(!b_input && b_timer > 0 && b_timer < 0.5f)

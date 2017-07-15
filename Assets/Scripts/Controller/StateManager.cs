@@ -94,8 +94,12 @@ public class StateManager : MonoBehaviour
 
         gameObject.layer = 8;
         ignoreLayers = ~(1 << 9);
-
+         
         anim.SetBool(StaticStrings.onGround, true);
+
+        characterStats.InitCurrent();
+
+        UIManager.singleton.AffectAll(characterStats.health, characterStats.focus, characterStats.stamina);
     }
 
     void SetupAnimator()
@@ -276,6 +280,9 @@ public class StateManager : MonoBehaviour
 
     void AttackAction(Action slot) {
 
+        if (characterStats._stamina < slot.staminaCost)
+            return;
+
         if (CheckForParry(slot))
             return;
         if (CheckForBackstab(slot))
@@ -301,14 +308,15 @@ public class StateManager : MonoBehaviour
         anim.SetFloat(StaticStrings.animSpeed, targetSpeed);
         anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
+        characterStats._stamina -= slot.staminaCost;
     }
 
     void SpellAction(Action slot) {
-
-
-        if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass) {
-            //targetAnim = cant cast spell
-            Debug.Log("Spell class doesn't match");
+        if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass || characterStats._stamina < slot.staminaCost || characterStats._focus < slot.focusCost) {
+            anim.SetBool(StaticStrings.mirror, slot.mirror);
+            anim.CrossFade("cant_spell", 0.2f);
+            canMove = false;
+            inAction = true;
         }
 
         ActionInput inp = actionManager.GetActionInput(this);
@@ -343,6 +351,8 @@ public class StateManager : MonoBehaviour
         anim.SetBool(StaticStrings.spellCasting, true);
         anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
+        characterStats._stamina -= slot.staminaCost;
+        characterStats._focus -= slot.focusCost;
 
         a_hook.InitIKForBreathSpell(spellIsMirrored);
 
@@ -371,19 +381,26 @@ public class StateManager : MonoBehaviour
             enableIK = true;
             a_hook.currentHand = (spellIsMirrored) ? AvatarIKGoal.LeftHand : AvatarIKGoal.RightHand;
 
-            if (spellCast_Loop != null)
-                spellCast_Loop();
-
-            if (rb == false && lb == false)
+            if ((rb == false && lb == false) || characterStats._focus < 2)
             {
                 isSpellCasting = false;
 
                 enableIK = false;
 
+                inventoryManager.breathCollider.SetActive(false);
+                inventoryManager.blockCollider.SetActive(false);
+
                 if (spellCast_Stop != null)
                     spellCast_Stop();
-
+                
+                return;
             }
+
+            if (spellCast_Loop != null)
+                spellCast_Loop();
+
+            characterStats._focus -= 1;
+
             return;
         }
 
@@ -463,7 +480,7 @@ public class StateManager : MonoBehaviour
             parryTarget.transform.rotation = eRotation;
             transform.rotation = ourRotation;
 
-            parryTarget.IsGettingParried(slot);
+            parryTarget.IsGettingParried(slot, inventoryManager.GetCurrentWeapon(slot.mirror));
 
             canMove = false;
             inAction = true;
@@ -505,7 +522,7 @@ public class StateManager : MonoBehaviour
             transform.position = targetPos;
 
             backstabTarget.transform.rotation = transform.rotation;
-            backstabTarget.IsGettingBackstabbed(slot);
+            backstabTarget.IsGettingBackstabbed(slot, inventoryManager.GetCurrentWeapon(slot.mirror));
 
             canMove = false;
             inAction = true;
@@ -684,6 +701,23 @@ public class StateManager : MonoBehaviour
     }
 
     public void AddHealth() {
-        characterStats.hp++;
+        characterStats.health++;
     }
+
+    public void MonitorStats() {
+        if (run && moveAmount > 00)
+        {
+            characterStats._stamina -= delta * 5;
+        }
+        else {
+            characterStats._stamina += delta * 3;
+        }
+
+        if (characterStats._stamina > characterStats.focus)
+            characterStats._stamina = characterStats.focus;
+        //characterStats._stamina = Mathf.Clamp(characterStats._stamina, 0, characterStats.stamina);
+
+        characterStats._health = Mathf.Clamp(characterStats._health, 0, characterStats.health);
+        characterStats._focus = Mathf.Clamp(characterStats._focus, 0, characterStats.focus);
+    } 
 }

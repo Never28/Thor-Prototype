@@ -4,10 +4,16 @@ using UnityEngine;
 
 [System.Serializable]
 public class CharacterStats {
+
+    [Header("Current")]
+    public float _health;
+    public float _focus;
+    public float _stamina;
+
     [Header("Base Power")]
-    public int hp = 100;
-    public int fp = 100;
-    public int stamina = 100;
+    public int health = 100;
+    public int focus = 50;
+    public int stamina = 30;
     public float equip = 20;
     public float poise = 20;
     public float itemDiscovery = 111;
@@ -37,6 +43,28 @@ public class CharacterStats {
     public int curse = 10;
 
     public int attunementSlots = 10;
+
+    public void InitCurrent() {
+
+        if (statEffects != null)
+            statEffects();
+
+        _health = health;
+        _focus = focus;
+        _stamina = stamina; 
+
+    }
+
+    public delegate void StatEffects();
+    public StatEffects statEffects;
+
+    public void AddHealth() {
+        health += 5;
+    }
+
+    public void RemoveHealth() {
+        health -= 5;
+    }
 }
 
 [System.Serializable]
