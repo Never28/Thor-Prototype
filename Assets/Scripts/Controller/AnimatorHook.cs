@@ -51,7 +51,7 @@ public class AnimatorHook : MonoBehaviour
 
     public void InitForRoll()
     {
-        //rolling = true;
+        rolling = true;
         roll_t = 0;
     }
 
@@ -76,7 +76,7 @@ public class AnimatorHook : MonoBehaviour
             return;
 
         if (states != null) {
-            if (states.canMove)
+            if (states.onEmpty)
                 return;
 
             delta = states.delta;
@@ -97,8 +97,8 @@ public class AnimatorHook : MonoBehaviour
         if (!rolling)
         {
             Vector3 delta2 = anim.deltaPosition;
-            delta2.y = 0;
             Vector3 v = (delta2 * rootMotionMultiplier) / delta;
+            v += Physics.gravity;
             rigid.velocity = v;
         }
         else
@@ -114,6 +114,7 @@ public class AnimatorHook : MonoBehaviour
             Vector3 v1 = Vector3.forward * zValue;
             Vector3 relative = transform.TransformDirection(v1);
             Vector3 v2 = (relative * rootMotionMultiplier) / delta;
+            v2 += Physics.gravity;
             rigid.velocity = v2;
         }
 
@@ -143,6 +144,17 @@ public class AnimatorHook : MonoBehaviour
             ik_handler.LateTick();
     }
 
+    public void OpenCanAttack() {
+        if (states) {
+            states.canAttack = true;
+        }
+    }
+
+    public void OpenCanMove() {
+        if (states)
+            states.canMove = true;
+    }
+
     public void OpenDamageColliders() {
         if (states) 
             states.inventoryManager.OpenAllDamageColliders();
@@ -151,7 +163,9 @@ public class AnimatorHook : MonoBehaviour
 
     public void CloseDamageColliders() {
         if (states)
-            states.inventoryManager.CloseAllDamageColliders();
+        {
+            states.inventoryManager.CloseAllDamageColliders();   
+        }
         CloseParryFlag();
     }
 

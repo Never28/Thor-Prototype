@@ -34,6 +34,7 @@ public static class StaticStrings
     public static string canMove = "canMove";
     public static string lockon = "lockon";
     public static string spellCasting = "spellCasting";
+    public static string onEmpty = "onEmpty";
 
     //Animator States
     public static string Rolls = "Rolls";

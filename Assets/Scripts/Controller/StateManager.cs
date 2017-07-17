@@ -36,6 +36,7 @@ public class StateManager : MonoBehaviour
     public bool lockOn;
     public bool inAction;
     public bool canMove;
+    public bool canAttack;
     public bool isSpellCasting;
     public bool enableIK;
     public bool isTwoHanded;
@@ -44,6 +45,7 @@ public class StateManager : MonoBehaviour
     public bool parryIsOn;
     public bool isBlocking;
     public bool isLeftHand;
+    public bool onEmpty;
 
     [Header("Other")]
     public EnemyTarget lockonTarget;
@@ -69,6 +71,9 @@ public class StateManager : MonoBehaviour
 
     [HideInInspector]
     public Action currentAction;
+
+    [HideInInspector]
+    public float airTimer;
 
     float _actionDelay;
 
@@ -131,9 +136,6 @@ public class StateManager : MonoBehaviour
         usingItem = anim.GetBool(StaticStrings.interacting);
         anim.SetBool(StaticStrings.spellCasting, isSpellCasting);
 
-        DetectAction();
-        DetectItemAction();
-
         inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
 
         anim.SetBool(StaticStrings.blocking, isBlocking);
@@ -162,12 +164,40 @@ public class StateManager : MonoBehaviour
             }
         }
 
-        canMove = anim.GetBool(StaticStrings.canMove);
+        onEmpty = anim.GetBool(StaticStrings.onEmpty);
+        //canMove = anim.GetBool(StaticStrings.canMove);
 
-        if (!canMove)
+        if (onEmpty) {
+            canAttack = true;
+            canMove = true;
+        }
+
+        if (!onEmpty && !canMove && !canAttack)
         {
             return;
         }
+
+        if (canMove && !onEmpty) {
+            if (moveAmount > 0.3f) {
+                anim.CrossFade("Empty Override", 0.1f);
+                onEmpty = true;
+            }
+        }
+
+        if (canAttack) {
+            if (IsInput()) {
+                //anim.CrossFade("Empty Override", 0.1f);
+            }
+        }
+
+        if (canAttack) {
+            DetectAction();
+        }
+        if (!canMove)
+        {
+            DetectItemAction();        
+        }
+
 
         //a_hook.rootMotionMultiplier = 1;
 
@@ -185,7 +215,7 @@ public class StateManager : MonoBehaviour
         if (run)
             targetSpeed = runSpeed;
 
-        if (onGround)
+        if (onGround && canMove)
             rigid.velocity = moveDir * (targetSpeed * moveAmount);
 
         if (run)
@@ -214,6 +244,13 @@ public class StateManager : MonoBehaviour
         HandleRolls();
     }
 
+    public bool IsInput() {
+        if (rt || rb || lt || lb || rollInput)
+            return true;
+
+        return false;
+    }
+
     void HandleRotation() {
         Vector3 targetDir = (lockOn == false) ? moveDir :
          (lockonTransform != null) ?
@@ -232,7 +269,7 @@ public class StateManager : MonoBehaviour
     }
 
     public void DetectItemAction() {
-        if (!canMove || usingItem || isBlocking)
+        if (!onEmpty || usingItem || isBlocking)
             return;
         if (!itemInput)
             return;
@@ -249,7 +286,7 @@ public class StateManager : MonoBehaviour
 
     public void DetectAction()
     {
-        if (!canMove || usingItem || isSpellCasting)
+        if (!canAttack && (!onEmpty || usingItem || isSpellCasting))
             return;
 
         if (!rb && !rt && !lt && !!!lb)
@@ -296,6 +333,8 @@ public class StateManager : MonoBehaviour
 
         currentAction = slot;
 
+        canAttack = false;
+        onEmpty = false;
         canMove = false;
         inAction = true;
         float targetSpeed = 1;
@@ -315,6 +354,7 @@ public class StateManager : MonoBehaviour
         if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass || characterStats._stamina < slot.staminaCost || characterStats._focus < slot.focusCost) {
             anim.SetBool(StaticStrings.mirror, slot.mirror);
             anim.CrossFade("cant_spell", 0.2f);
+            canAttack = false;
             canMove = false;
             inAction = true;
         }
@@ -409,6 +449,8 @@ public class StateManager : MonoBehaviour
             inventoryManager.currentSpell.currentParticle.SetActive(true);
     
         if (spellCastTime > maxSpellCastTime) {
+            onEmpty = false;
+            canAttack = false;
             canMove = false;
             inAction = true;
             isSpellCasting = false;
@@ -482,6 +524,8 @@ public class StateManager : MonoBehaviour
 
             parryTarget.IsGettingParried(slot, inventoryManager.GetCurrentWeapon(slot.mirror));
 
+            onEmpty = false;
+            canAttack = false;
             canMove = false;
             inAction = true;
             anim.SetBool(StaticStrings.mirror, slot.mirror);
@@ -524,6 +568,8 @@ public class StateManager : MonoBehaviour
             backstabTarget.transform.rotation = transform.rotation;
             backstabTarget.IsGettingBackstabbed(slot, inventoryManager.GetCurrentWeapon(slot.mirror));
 
+            onEmpty = false;
+            canAttack = false;
             canMove = false;
             inAction = true;
             anim.SetBool(StaticStrings.mirror, slot.mirror);
@@ -552,6 +598,9 @@ public class StateManager : MonoBehaviour
             return;
 
         canBeParried = slot.canBeParried;
+
+        onEmpty = false;
+        canAttack = false;
         canMove = false;
         inAction = true;
         float targetSpeed = 1;
@@ -604,6 +653,8 @@ public class StateManager : MonoBehaviour
         anim.SetFloat(StaticStrings.vertical, v);
         anim.SetFloat(StaticStrings.horizontal, h);
 
+        onEmpty = false;
+        canAttack = false;
         canMove = false;
         inAction = true;
         anim.CrossFade(StaticStrings.Rolls, 0.2f);
@@ -615,6 +666,11 @@ public class StateManager : MonoBehaviour
         delta = d;
         onGround = OnGround();
         anim.SetBool(StaticStrings.onGround, onGround);
+
+        if (!onGround)
+            airTimer += delta;
+        else
+            airTimer = 0;
     }
 
     void HandleMovementAnimations()

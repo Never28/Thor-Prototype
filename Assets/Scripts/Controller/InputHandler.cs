@@ -185,17 +185,19 @@ public class InputHandler : MonoBehaviour
         {
             if (!prev_d_up)
             {
-                states.inventoryManager.ChangeToNextSpell();
                 prev_d_up = true;
-
+                states.inventoryManager.ChangeToNextSpell();
             }
         }
 
-        if (!states.canMove)
-            return;
+
         if (!d_up)
             prev_d_up = false;
+        if (!d_down)
+            prev_d_down = false;
 
+        if (!states.onEmpty)
+            return;
         if (states.isTwoHanded)
             return;
 
@@ -219,8 +221,7 @@ public class InputHandler : MonoBehaviour
         }
 
 
-        if (!d_down)
-            prev_d_down = false;
+
         if (!d_left)
             prev_d_left = false;
         if (!d_right)

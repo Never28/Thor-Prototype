@@ -16,6 +16,8 @@ public class EnemyStates : MonoBehaviour {
     public bool isDead;
     public bool dontDoAnything;
 
+    public float airTimer;
+
     public StateManager parriedBy;
 
     public Animator anim;
