@@ -28,6 +28,8 @@ public class AnimatorHook : MonoBehaviour
     public bool useIK;
     public AvatarIKGoal currentHand;
 
+    public bool killDelta;
+
     public void Init(StateManager st, EnemyStates eSt)
     {
         states = st;
@@ -97,8 +99,12 @@ public class AnimatorHook : MonoBehaviour
         if (!rolling)
         {
             Vector3 delta2 = anim.deltaPosition;
+            if (killDelta) {
+                killDelta = false;
+                delta2 = Vector3.zero;
+            }
             Vector3 v = (delta2 * rootMotionMultiplier) / delta;
-            v += Physics.gravity;
+            //v += Physics.gravity;
             rigid.velocity = v;
         }
         else
@@ -114,7 +120,7 @@ public class AnimatorHook : MonoBehaviour
             Vector3 v1 = Vector3.forward * zValue;
             Vector3 relative = transform.TransformDirection(v1);
             Vector3 v2 = (relative * rootMotionMultiplier) / delta;
-            v2 += Physics.gravity;
+            //v2 += Physics.gravity;
             rigid.velocity = v2;
         }
 

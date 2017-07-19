@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class ActionManager : MonoBehaviour {
 
+    public int actionIndex;
     public List<Action> actionSlots = new List<Action>();
-
     public ItemAction consumableItem;
 
     StateManager states;
@@ -42,7 +42,7 @@ public class ActionManager : MonoBehaviour {
         for (int i = 0; i < w.twoHandedActions.Count; i++)
         {
             Action a = StaticFunctions.GetAction(w.twoHandedActions[i].input, actionSlots);
-            a.targetAnim = w.twoHandedActions[i].targetAnim;
+            a.steps = w.twoHandedActions[i].steps;
             a.type = w.twoHandedActions[i].type;
         }
     }
@@ -51,7 +51,7 @@ public class ActionManager : MonoBehaviour {
         for (int i = 0; i < 4; i++)
         {
             Action a = StaticFunctions.GetAction((ActionInput)i, actionSlots);
-            a.targetAnim = null;
+            a.steps = null;
             a.mirror = false;
             a.type = ActionType.attack;
         }
@@ -71,6 +71,10 @@ public class ActionManager : MonoBehaviour {
     public Action GetActionSlot(StateManager st) {
         ActionInput input = GetActionInput(st);
         return StaticFunctions.GetAction(input, actionSlots);
+    }
+
+    public Action GetActionFromInput(ActionInput a_input) {
+        return StaticFunctions.GetAction(a_input, actionSlots);
     }
 
     public ActionInput GetActionInput(StateManager st) { 
@@ -114,6 +118,7 @@ public class Action {
     public ActionType type;
     public SpellClass spellClass;
     public string targetAnim;
+    public List<ActionSteps> steps;
     public bool mirror = false;
     public bool canBeParried = true;
     public bool changeSpeed = false;
@@ -130,6 +135,54 @@ public class Action {
 
     public bool overrideDamageAnim;
     public string damageAnim;
+
+    ActionSteps defaultStep;
+
+    public ActionSteps GetActionStep(ref int index) {
+        if(steps == null || steps.Count == 0){
+            if (defaultStep == null) {
+                defaultStep = new ActionSteps();
+                defaultStep.branches = new List<ActionAnim>();
+                ActionAnim aa = new ActionAnim();
+                aa.input = input;
+                aa.targetAnim = targetAnim;
+                defaultStep.branches.Add(aa);
+            }
+            return defaultStep;
+        }
+
+        if (index > steps.Count - 1)
+            index = 0;
+        ActionSteps returnValue = steps[index];
+        if (index > steps.Count - 1)
+        {
+            index = 0;
+        }
+        else {
+            index++;
+        }
+        return returnValue;
+    }
+}
+
+[System.Serializable]
+public class ActionSteps {
+    public List<ActionAnim> branches = new List<ActionAnim>();
+
+    public ActionAnim GetBranch(ActionInput inp) {
+        for (int i = 0; i < branches.Count; i++)
+        {
+            if (branches[i].input == inp)
+                return branches[i];
+        }
+        return branches[0];
+    }
+}
+
+[System.Serializable]
+public class ActionAnim {
+    public ActionInput input;
+    public string targetAnim;
 }
 
 [System.Serializable]

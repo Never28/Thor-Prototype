@@ -50,6 +50,31 @@ public static class StaticFunctions {
         a.canBackstab = w_a.canBackstab;
         a.overrideDamageAnim = w_a.overrideDamageAnim;
         a.damageAnim = w_a.damageAnim;
+
+        DeepCopySteps(w_a, a);
+    }
+
+    public static void DeepCopySteps(Action from, Action to) {
+
+        to.steps = new List<ActionSteps>();
+        for (int i = 0; i < from.steps.Count; i++)
+        {
+            ActionSteps step = new ActionSteps();
+            DeepCopyStep(from.steps[i], step);
+            to.steps.Add(step);
+        }
+    }
+
+    public static void DeepCopyStep(ActionSteps from, ActionSteps to) {
+
+        to.branches = new List<ActionAnim>();
+        for (int i = 0; i < from.branches.Count; i++)
+        {
+            ActionAnim a = new ActionAnim();
+            a.input = from.branches[i].input;
+            a.targetAnim = from.branches[i].targetAnim;
+            to.branches.Add(a);
+        }
     }
 
     public static void DeepCopyAction(Weapon w, ActionInput input, ActionInput assign, List<Action> actionList, bool isLeftHand = false)
@@ -58,6 +83,7 @@ public static class StaticFunctions {
         Action w_a = w.GetAction(w.actions, input);
         if (w_a == null)
             return;
+        DeepCopySteps(w_a, a);
         a.targetAnim = w_a.targetAnim;
         a.type = w_a.type;
         a.spellClass = w_a.spellClass;

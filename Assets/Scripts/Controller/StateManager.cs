@@ -74,6 +74,8 @@ public class StateManager : MonoBehaviour
 
     [HideInInspector]
     public float airTimer;
+    public ActionInput storePrevActionInput;
+    public ActionInput storeActionInput;
 
     float _actionDelay;
 
@@ -292,7 +294,16 @@ public class StateManager : MonoBehaviour
         if (!rb && !rt && !lt && !!!lb)
             return;
 
-        Action slot = actionManager.GetActionSlot(this);
+        ActionInput targetInput = actionManager.GetActionInput(this);
+        storeActionInput = targetInput;
+        if (!onEmpty)
+        {
+            a_hook.killDelta = true;
+            targetInput = storePrevActionInput;
+        }
+        storePrevActionInput = targetInput;
+
+        Action slot = actionManager.GetActionFromInput(targetInput);
         if (slot == null)
             return;
 
@@ -326,7 +337,7 @@ public class StateManager : MonoBehaviour
             return;
 
         string targetAnim = null;
-        targetAnim = slot.targetAnim;
+        targetAnim = slot.GetActionStep(ref actionManager.actionIndex).GetBranch(storeActionInput).targetAnim; ;
 
         if (string.IsNullOrEmpty(targetAnim))
             return;
@@ -592,7 +603,7 @@ public class StateManager : MonoBehaviour
     void ParryAction(Action slot)
     {
         string targetAnim = null;
-        targetAnim = slot.targetAnim;
+        targetAnim = slot.GetActionStep(ref actionManager.actionIndex).GetBranch(storeActionInput).targetAnim;
 
         if (string.IsNullOrEmpty(targetAnim))
             return;

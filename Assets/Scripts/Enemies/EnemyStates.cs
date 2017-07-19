@@ -90,7 +90,7 @@ public class EnemyStates : MonoBehaviour {
 
     void Update() {
         delta = Time.deltaTime;
-        canMove = anim.GetBool(StaticStrings.canMove);
+        //canMove = anim.GetBool(StaticStrings.canMove);
 
         if (spellEffect_Loop != null) {
             spellEffect_Loop();
