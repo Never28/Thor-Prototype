@@ -35,6 +35,8 @@ public class StateManager : MonoBehaviour
     public bool run;
     public bool lockOn;
     public bool inAction;
+    public bool damageIsOn;
+    public bool canRotate;
     public bool canMove;
     public bool canAttack;
     public bool isSpellCasting;
@@ -140,15 +142,11 @@ public class StateManager : MonoBehaviour
 
         inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
 
-        anim.SetBool(StaticStrings.blocking, isBlocking);
-        anim.SetBool(StaticStrings.isLeft, isLeftHand);
-
         if (!isBlocking && !isSpellCasting)
         {
             enableIK = false; //commentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
         }
 
-        a_hook.useIK = enableIK; //commentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
         //a_hook.useIK = true; //scommentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
 
         if (inAction)
@@ -167,14 +165,17 @@ public class StateManager : MonoBehaviour
         }
 
         onEmpty = anim.GetBool(StaticStrings.onEmpty);
-        //canMove = anim.GetBool(StaticStrings.canMove);
 
         if (onEmpty) {
             canAttack = true;
             canMove = true;
         }
 
-        if (!onEmpty && !canMove && !canAttack)
+        if (canRotate) {
+            HandleRotation();
+        }
+
+        if (!onEmpty && !canMove && !canAttack) //animation is playing
         {
             return;
         }
@@ -183,12 +184,6 @@ public class StateManager : MonoBehaviour
             if (moveAmount > 0.3f) {
                 anim.CrossFade("Empty Override", 0.1f);
                 onEmpty = true;
-            }
-        }
-
-        if (canAttack) {
-            if (IsInput()) {
-                //anim.CrossFade("Empty Override", 0.1f);
             }
         }
 
@@ -224,8 +219,6 @@ public class StateManager : MonoBehaviour
             lockOn = false;
 
 
-        HandleRotation();
-
         anim.SetBool(StaticStrings.lockon, lockOn);
 
         if (lockOn)
@@ -237,6 +230,12 @@ public class StateManager : MonoBehaviour
             HandleMovementAnimations();
         }
 
+        a_hook.useIK = enableIK; //commentare per lasciare l'animazione bloccata nell'ik e regolare gli helper ed aggiustare l'animazione
+        //anim.SetBool(StaticStrings.blocking, isBlocking);
+        anim.SetBool(StaticStrings.isLeft, isLeftHand);
+
+        HandleBlocking();
+
         if (isSpellCasting) {
             HandleSpellCasting();
             return;
@@ -244,6 +243,7 @@ public class StateManager : MonoBehaviour
         
         a_hook.CloseRoll();
         HandleRolls();
+
     }
 
     public bool IsInput() {
@@ -362,7 +362,9 @@ public class StateManager : MonoBehaviour
     }
 
     void SpellAction(Action slot) {
-        if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass || characterStats._stamina < slot.staminaCost || characterStats._focus < slot.focusCost) {
+        if(characterStats._stamina < slot.staminaCost)
+            return;
+        if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass || characterStats._focus < slot.focusCost) {
             anim.SetBool(StaticStrings.mirror, slot.mirror);
             anim.CrossFade("cant_spell", 0.2f);
             canAttack = false;
@@ -402,8 +404,9 @@ public class StateManager : MonoBehaviour
         anim.SetBool(StaticStrings.spellCasting, true);
         anim.SetBool(StaticStrings.mirror, slot.mirror);
         anim.CrossFade(targetAnim, 0.2f);
-        characterStats._stamina -= slot.staminaCost;
-        characterStats._focus -= slot.focusCost;
+
+        curFocusCost = s_slot.focusCost;
+        curStaminaCost = s_slot.staminaCost;
 
         a_hook.InitIKForBreathSpell(spellIsMirrored);
 
@@ -411,6 +414,8 @@ public class StateManager : MonoBehaviour
             spellCast_Start();
     }
 
+    float curFocusCost;
+    float curStaminaCost;
     float spellCastTime;
     float maxSpellCastTime;
     string spellTargetAnim;
@@ -471,6 +476,25 @@ public class StateManager : MonoBehaviour
             anim.CrossFade(targetAnim, 0.2f);
         }
     }
+    
+    bool blockAnim;
+    string block_idle_anim;
+    void HandleBlocking()
+    {
+
+        if (!isBlocking)
+        {
+            if (blockAnim) 
+            {
+                anim.CrossFade(block_idle_anim, 0.1f);
+                blockAnim = false;
+            }
+        }
+        else { 
+            
+        }
+
+    }
 
     public void ThrowProjectile() {
         if (projectileCandidate == null)
@@ -489,6 +513,9 @@ public class StateManager : MonoBehaviour
 
         Projectile proj = go.GetComponent<Projectile>();
         proj.Init();
+
+        characterStats._stamina -= curStaminaCost;
+        characterStats._focus -= curFocusCost;
     }
 
     bool CheckForParry(Action slot) {
@@ -597,7 +624,16 @@ public class StateManager : MonoBehaviour
         enableIK = true;
         isLeftHand = slot.mirror;
         a_hook.currentHand = (slot.mirror) ? AvatarIKGoal.LeftHand : AvatarIKGoal.RightHand;
-        a_hook.InitIKForShield(slot.mirror); 
+        a_hook.InitIKForShield(slot.mirror);
+        
+        if (!blockAnim) {
+            block_idle_anim = (!isTwoHanded) ? inventoryManager.GetCurrentWeapon(isLeftHand).oh_idle : inventoryManager.GetCurrentWeapon(isLeftHand).th_idle;
+            block_idle_anim += (isLeftHand) ? "_l" : "_r";
+            string targetAnim = slot.targetAnim;
+            targetAnim += (isLeftHand) ? "_l" : "_r";
+            anim.CrossFade(targetAnim, 0.1f);
+            blockAnim = true;
+        }
     }
 
     void ParryAction(Action slot)
@@ -786,5 +822,21 @@ public class StateManager : MonoBehaviour
 
         characterStats._health = Mathf.Clamp(characterStats._health, 0, characterStats.health);
         characterStats._focus = Mathf.Clamp(characterStats._focus, 0, characterStats.focus);
-    } 
+    }
+
+    public void SubstractStaminaOverTime() {
+        characterStats._stamina -= curStaminaCost;
+    }
+
+    public void SubstractFocusOverTime() {
+        characterStats._focus -= curFocusCost;
+    }
+
+    public void AffectBlocking() {
+        isBlocking = true;
+    }
+
+    public void StopAffectingBlocking() {
+        isBlocking = false;
+    }
 }

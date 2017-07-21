@@ -44,6 +44,7 @@ public class SpellEffectManager : MonoBehaviour {
     void FireBreath(StateManager c) {
         c.spellCast_Start = c.inventoryManager.OpenBreathCollider;
         c.spellCast_Loop = c.inventoryManager.EmitSpellParticle;
+        c.spellCast_Loop += c.SubstractFocusOverTime;
         c.spellCast_Stop = c.inventoryManager.CloseBreathCollider;
     }
 
@@ -51,7 +52,10 @@ public class SpellEffectManager : MonoBehaviour {
     {
         c.spellCast_Start = c.inventoryManager.OpenBlockCollider;
         c.spellCast_Loop = c.inventoryManager.EmitSpellParticle;
+        c.spellCast_Loop += c.SubstractFocusOverTime;
+        c.spellCast_Loop += c.AffectBlocking;
         c.spellCast_Stop = c.inventoryManager.CloseBlockCollider;
+        c.spellCast_Stop += c.StopAffectingBlocking;
     }
 
     void HealingSmall(StateManager c) {

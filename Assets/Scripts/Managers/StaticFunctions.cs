@@ -128,16 +128,18 @@ public static class StaticFunctions {
         for (int i = 0; i < from.spellActions.Count; i++)
         {
             SpellAction a = new SpellAction();
-            DeepCopySpellActionToSpellAction(a, from.spellActions[i]);
+            DeepCopySpellAction(a, from.spellActions[i]);
             to.spellActions.Add(a);
         }
     }
 
-    public static void DeepCopySpellActionToSpellAction(SpellAction to, SpellAction from) {
+    public static void DeepCopySpellAction(SpellAction to, SpellAction from) {
         to.input = from.input;
         to.targetAnim = from.targetAnim;
         to.throwAnim = from.throwAnim;
         to.castTime = from.castTime;
+        to.focusCost = from.focusCost;
+        to.staminaCost = from.staminaCost;
     }
 
     public static Action GetAction(ActionInput input, List<Action> actions)

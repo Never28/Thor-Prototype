@@ -162,14 +162,18 @@ public class AnimatorHook : MonoBehaviour
     }
 
     public void OpenDamageColliders() {
-        if (states) 
+        if (states)
+        {
+            states.damageIsOn = true;
             states.inventoryManager.OpenAllDamageColliders();
+        }
         OpenParryFlag();
     }
 
     public void CloseDamageColliders() {
         if (states)
         {
+            states.damageIsOn = false;
             states.inventoryManager.CloseAllDamageColliders();   
         }
         CloseParryFlag();
@@ -222,5 +226,15 @@ public class AnimatorHook : MonoBehaviour
     public void InitIKForBreathSpell(bool isLeft)
     {
         ik_handler.UpdateIKTargets(IKSnapshotType.breath, isLeft);
+    }
+
+    public void OpenRotationControl() {
+        if (states)
+            states.canRotate = true;
+    }
+
+    public void CloseRotationControl() {
+        if (states)
+            states.canRotate = false;
     }
 }

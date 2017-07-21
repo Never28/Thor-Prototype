@@ -191,6 +191,8 @@ public class SpellAction {
     public string targetAnim;
     public string throwAnim;
     public float castTime;
+    public float focusCost;
+    public float staminaCost;
 }
 
 [System.Serializable]
