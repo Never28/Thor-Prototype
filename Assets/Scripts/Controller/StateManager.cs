@@ -139,8 +139,8 @@ public class StateManager : MonoBehaviour
         isBlocking = false;
         usingItem = anim.GetBool(StaticStrings.interacting);
         anim.SetBool(StaticStrings.spellCasting, isSpellCasting);
-
-        inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
+        if (inventoryManager.rightHandWeapon != null)
+            inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
 
         if (!isBlocking && !isSpellCasting)
         {
@@ -337,7 +337,7 @@ public class StateManager : MonoBehaviour
             return;
 
         string targetAnim = null;
-        targetAnim = slot.GetActionStep(ref actionManager.actionIndex).GetBranch(storeActionInput).targetAnim; ;
+        targetAnim = slot.GetActionStep(ref actionManager.actionIndex).targetAnim; ;
 
         if (string.IsNullOrEmpty(targetAnim))
             return;
@@ -430,6 +430,12 @@ public class StateManager : MonoBehaviour
     public SpellCast_Loop spellCast_Loop;
     public SpellCast_Stop spellCast_Stop;
 
+    void EmptySpellCastDelegate() {
+        spellCast_Start = null;
+        spellCast_Loop = null;
+        spellCast_Stop = null;
+    }
+
     void HandleSpellCasting() {
 
         if (curSpellType == SpellType.looping) {
@@ -448,7 +454,9 @@ public class StateManager : MonoBehaviour
 
                 if (spellCast_Stop != null)
                     spellCast_Stop();
-                
+
+                EmptySpellCastDelegate();
+
                 return;
             }
 
@@ -629,7 +637,7 @@ public class StateManager : MonoBehaviour
         if (!blockAnim) {
             block_idle_anim = (!isTwoHanded) ? inventoryManager.GetCurrentWeapon(isLeftHand).oh_idle : inventoryManager.GetCurrentWeapon(isLeftHand).th_idle;
             block_idle_anim += (isLeftHand) ? "_l" : "_r";
-            string targetAnim = slot.targetAnim;
+            string targetAnim = slot.firstStep.targetAnim;
             targetAnim += (isLeftHand) ? "_l" : "_r";
             anim.CrossFade(targetAnim, 0.1f);
             blockAnim = true;
@@ -639,7 +647,7 @@ public class StateManager : MonoBehaviour
     void ParryAction(Action slot)
     {
         string targetAnim = null;
-        targetAnim = slot.GetActionStep(ref actionManager.actionIndex).GetBranch(storeActionInput).targetAnim;
+        targetAnim = slot.GetActionStep(ref actionManager.actionIndex).targetAnim;
 
         if (string.IsNullOrEmpty(targetAnim))
             return;

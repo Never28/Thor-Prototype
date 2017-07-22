@@ -104,7 +104,8 @@ public class AnimatorHook : MonoBehaviour
                 delta2 = Vector3.zero;
             }
             Vector3 v = (delta2 * rootMotionMultiplier) / delta;
-            //v += Physics.gravity;
+            if(!states.onGround)
+                v += Physics.gravity;
             rigid.velocity = v;
         }
         else
@@ -120,7 +121,8 @@ public class AnimatorHook : MonoBehaviour
             Vector3 v1 = Vector3.forward * zValue;
             Vector3 relative = transform.TransformDirection(v1);
             Vector3 v2 = (relative * rootMotionMultiplier) / delta;
-            //v2 += Physics.gravity;
+            if (!states.onGround)
+                v2 += Physics.gravity;
             rigid.velocity = v2;
         }
 

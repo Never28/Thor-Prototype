@@ -19,9 +19,13 @@ public class ActionManager : MonoBehaviour {
     public void UpdateActionsOneHanded()
     {
         EmptyAllSlots();
-
-        StaticFunctions.DeepCopyAction(states.inventoryManager.rightHandWeapon.instance, ActionInput.rb, ActionInput.rb, actionSlots);
-        StaticFunctions.DeepCopyAction(states.inventoryManager.rightHandWeapon.instance, ActionInput.rt, ActionInput.rt, actionSlots);
+        if (states.inventoryManager.rightHandWeapon != null)
+        {
+            StaticFunctions.DeepCopyAction(states.inventoryManager.rightHandWeapon.instance, ActionInput.rb, ActionInput.rb, actionSlots);
+            StaticFunctions.DeepCopyAction(states.inventoryManager.rightHandWeapon.instance, ActionInput.rt, ActionInput.rt, actionSlots);
+        }
+        if (states.inventoryManager.leftHandWeapon == null)
+            return;
 
         if (states.inventoryManager.hasLeftHandWeapon)
         {
@@ -37,35 +41,38 @@ public class ActionManager : MonoBehaviour {
     public void UpdateActionsTwoHanded()
     {
         EmptyAllSlots();
+        if (states.inventoryManager.rightHandWeapon == null)
+            return;
+
         Weapon w = states.inventoryManager.rightHandWeapon.instance;
 
         for (int i = 0; i < w.twoHandedActions.Count; i++)
         {
-            Action a = StaticFunctions.GetAction(w.twoHandedActions[i].input, actionSlots);
-            a.steps = w.twoHandedActions[i].steps;
+            Action a = StaticFunctions.GetAction(w.twoHandedActions[i].GetFirstInput(), actionSlots);
+            a.firstStep.targetAnim = w.twoHandedActions[i].firstStep.targetAnim;
+            StaticFunctions.DeepCopySteps(w.twoHandedActions[i], a);
             a.type = w.twoHandedActions[i].type;
         }
     }
 
-    void EmptyAllSlots() {
+    void EmptyAllSlots()
+    {
         for (int i = 0; i < 4; i++)
         {
             Action a = StaticFunctions.GetAction((ActionInput)i, actionSlots);
-            a.steps = null;
+
+            if (a == null)
+                return;
+
+            //a.firstStep = null;
+            a.comboSteps = null;
             a.mirror = false;
             a.type = ActionType.attack;
         }
-    }
-
-    ActionManager() {
-        if (actionSlots.Count != 0)
-            return;
-        for (int i = 0; i < 4; i++)
-        {
-            Action a = new Action();
-            a.input = (ActionInput)i;
-            actionSlots.Add(a);
-        }
+        StaticFunctions.DeepCopyAction(states.inventoryManager.unarmedRuntime.instance, ActionInput.rb, ActionInput.rb, actionSlots);
+        StaticFunctions.DeepCopyAction(states.inventoryManager.unarmedRuntime.instance, ActionInput.rt, ActionInput.rt, actionSlots);
+        StaticFunctions.DeepCopyAction(states.inventoryManager.unarmedRuntime.instance, ActionInput.rb, ActionInput.lb, actionSlots, true);
+        StaticFunctions.DeepCopyAction(states.inventoryManager.unarmedRuntime.instance, ActionInput.rt, ActionInput.lt, actionSlots, true);
     }
 
     public Action GetActionSlot(StateManager st) {
@@ -92,7 +99,7 @@ public class ActionManager : MonoBehaviour {
     }
 
     public bool IsLeftHandSlot(Action slot) {
-        return (slot.input == ActionInput.lb || slot.input == ActionInput.lt);
+        return (slot.GetFirstInput() == ActionInput.lb || slot.GetFirstInput() == ActionInput.lt);
     }
 }
 
@@ -114,11 +121,10 @@ public enum SpellType {
 
 [System.Serializable]
 public class Action {
-    public ActionInput input;
     public ActionType type;
     public SpellClass spellClass;
-    public string targetAnim;
-    public List<ActionSteps> steps;
+    public ActionAnim firstStep;
+    public List<ActionAnim> comboSteps;
     public bool mirror = false;
     public bool canBeParried = true;
     public bool changeSpeed = false;
@@ -136,31 +142,33 @@ public class Action {
     public bool overrideDamageAnim;
     public string damageAnim;
 
-    ActionSteps defaultStep;
+    public ActionInput GetFirstInput()
+    {
+        if (firstStep == null)
+            firstStep = new ActionAnim();
+        return firstStep.input;
+    }
 
-    public ActionSteps GetActionStep(ref int index) {
-        if(steps == null || steps.Count == 0){
-            if (defaultStep == null) {
-                defaultStep = new ActionSteps();
-                defaultStep.branches = new List<ActionAnim>();
-                ActionAnim aa = new ActionAnim();
-                aa.input = input;
-                aa.targetAnim = targetAnim;
-                defaultStep.branches.Add(aa);
-            }
-            return defaultStep;
-        }
+    public ActionAnim GetActionStep(ref int index) {
 
-        if (index > steps.Count - 1)
-            index = 0;
-        ActionSteps returnValue = steps[index];
-        if (index > steps.Count - 1)
+        if (index == 0)
         {
+            if(comboSteps.Count == 0){
+                index = 0;
+            }
+            else {
+                index++;
+            }
+            return firstStep;
+        }
+
+        if (index > comboSteps.Count - 1)
             index = 0;
-        }
-        else {
-            index++;
-        }
+
+        ActionAnim returnValue = comboSteps[index - 1];
+        index++;
+        if (index > comboSteps.Count - 1)
+            index = 0;
         return returnValue;
     }
 }

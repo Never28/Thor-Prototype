@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour {
 
+    public string unarmedId = "unarmed";
+    public RuntimeWeapon unarmedRuntime;
+
     public List<string> rh_weapons;
     public List<string> lh_weapons;
     public List<string> spell_items;
@@ -38,14 +41,18 @@ public class InventoryManager : MonoBehaviour {
         CloseBlockCollider();
     }
 
-    public void LoadInventory() { 
+    public void LoadInventory() {
+        unarmedRuntime = WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(unarmedId), false);
+
         for (int i = 0; i < rh_weapons.Count; i++)
         {
-            WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(rh_weapons[i]));
+            RuntimeWeapon rw = WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(rh_weapons[i]));
+            r_r_weapons.Add(rw);
         }
         for (int i = 0; i < lh_weapons.Count; i++)
         {
-            WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(lh_weapons[i]),true);
+            RuntimeWeapon rw = WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(lh_weapons[i]), true);
+            r_l_weapons.Add(rw);
         }
 
         if (r_r_weapons.Count > 0) {
@@ -164,10 +171,14 @@ public class InventoryManager : MonoBehaviour {
     public RuntimeWeapon WeaponToRuntimeWeapon(Weapon w, bool isLeft = false) {
         GameObject go = new GameObject();
         RuntimeWeapon inst = go.AddComponent<RuntimeWeapon>();
+        go.name = w.itemName;
 
         inst.instance = new Weapon();
         StaticFunctions.DeepCopyWeapon(w, inst.instance);
-        go.name = w.itemName;
+
+        inst.weaponStats = new WeaponStats();
+        WeaponStats w_stats = ResourcesManager.singleton.GetWeaponStats(w.itemName);
+        StaticFunctions.DeepCopyWeaponStats(w_stats, inst.weaponStats);
 
         inst.weaponModel = Instantiate(inst.instance.modelPrefab) as GameObject;
         Transform p = states.anim.GetBoneTransform((isLeft) ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
@@ -188,11 +199,6 @@ public class InventoryManager : MonoBehaviour {
         inst.w_hook = inst.weaponModel.GetComponentInChildren<WeaponHook>();
         inst.w_hook.InitDamageColliders(states);
 
-        if (isLeft) {
-            r_l_weapons.Add(inst);
-        }else{
-            r_r_weapons.Add(inst);
-        }
 
         inst.weaponModel.SetActive(false);
 
@@ -234,6 +240,9 @@ public class InventoryManager : MonoBehaviour {
     }
 
     public void ChangeToNextWeapon(bool isLeft) {
+        states.isTwoHanded = false;
+        states.HandleTwoHanded();
+
         if (isLeft)
         {
             if (l_index < r_l_weapons.Count - 1)
@@ -322,7 +331,6 @@ public class Weapon : Item
     public float backstabMultiplier;
 
     public GameObject modelPrefab;
-    public WeaponStats weaponStats;
 
     public Vector3 r_model_pos;
     public Vector3 l_model_pos;
@@ -337,7 +345,7 @@ public class Weapon : Item
 
         for (int i = 0; i < l.Count; i++)
         {
-            if (l[i].input == input)
+            if (l[i].GetFirstInput() == input)
                 return l[i];
         }
         return null;

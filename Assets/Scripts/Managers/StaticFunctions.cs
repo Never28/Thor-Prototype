@@ -33,66 +33,60 @@ public static class StaticFunctions {
         to.r_model_eulers = from.r_model_eulers;
         to.l_model_eulers = from.l_model_eulers;
         to.model_scale = from.model_scale;
-
-        to.weaponStats = new WeaponStats();
-        DeepCopyWeaponStats(from.weaponStats, to.weaponStats);
     }
 
-    public static void DeepCopyActionToAction(Action a, Action w_a) {
-        a.input = w_a.input;
-        a.targetAnim = w_a.targetAnim;
-        a.type = w_a.type;
-        a.spellClass = w_a.spellClass;
-        a.canParry = w_a.canParry;
-        a.canBeParried = w_a.canBeParried;
-        a.changeSpeed = w_a.changeSpeed;
-        a.animSpeed = w_a.animSpeed;
-        a.canBackstab = w_a.canBackstab;
-        a.overrideDamageAnim = w_a.overrideDamageAnim;
-        a.damageAnim = w_a.damageAnim;
+    public static void DeepCopyActionToAction(Action to, Action from) {
+        to.firstStep = new ActionAnim();
+        to.firstStep.input = from.firstStep.input;
+        to.firstStep.targetAnim = from.firstStep.targetAnim;
 
-        DeepCopySteps(w_a, a);
+        to.comboSteps = new List<ActionAnim>();
+
+        to.type = from.type;
+        to.spellClass = from.spellClass;
+        to.canParry = from.canParry;
+        to.canBeParried = from.canBeParried;
+        to.changeSpeed = from.changeSpeed;
+        to.animSpeed = from.animSpeed;
+        to.canBackstab = from.canBackstab;
+        to.overrideDamageAnim = from.overrideDamageAnim;
+        to.damageAnim = from.damageAnim;
+
+        DeepCopySteps(from, to);
     }
 
     public static void DeepCopySteps(Action from, Action to) {
 
-        to.steps = new List<ActionSteps>();
-        for (int i = 0; i < from.steps.Count; i++)
-        {
-            ActionSteps step = new ActionSteps();
-            DeepCopyStep(from.steps[i], step);
-            to.steps.Add(step);
-        }
-    }
-
-    public static void DeepCopyStep(ActionSteps from, ActionSteps to) {
-
-        to.branches = new List<ActionAnim>();
-        for (int i = 0; i < from.branches.Count; i++)
+        to.comboSteps = new List<ActionAnim>();
+        for (int i = 0; i < from.comboSteps.Count; i++)
         {
             ActionAnim a = new ActionAnim();
-            a.input = from.branches[i].input;
-            a.targetAnim = from.branches[i].targetAnim;
-            to.branches.Add(a);
+            a.input = from.comboSteps[i].input;
+            a.targetAnim = from.comboSteps[i].targetAnim;
+            to.comboSteps.Add(a);
         }
     }
 
     public static void DeepCopyAction(Weapon w, ActionInput input, ActionInput assign, List<Action> actionList, bool isLeftHand = false)
     {
         Action a = GetAction(assign, actionList);
-        Action w_a = w.GetAction(w.actions, input);
-        if (w_a == null)
+        Action from = w.GetAction(w.actions, input);
+        if (from == null)
             return;
-        DeepCopySteps(w_a, a);
-        a.targetAnim = w_a.targetAnim;
-        a.type = w_a.type;
-        a.spellClass = w_a.spellClass;
-        a.canBeParried = w_a.canBeParried;
-        a.changeSpeed = w_a.changeSpeed;
-        a.animSpeed = w_a.animSpeed;
-        a.canBackstab = w_a.canBackstab;
-        a.overrideDamageAnim = w_a.overrideDamageAnim;
-        a.damageAnim = w_a.damageAnim;
+
+        a.firstStep = new ActionAnim();
+        a.firstStep.targetAnim = from.firstStep.targetAnim;
+        a.comboSteps = new List<ActionAnim>();
+
+        DeepCopySteps(from, a);
+        a.type = from.type;
+        a.spellClass = from.spellClass;
+        a.canBeParried = from.canBeParried;
+        a.changeSpeed = from.changeSpeed;
+        a.animSpeed = from.animSpeed;
+        a.canBackstab = from.canBackstab;
+        a.overrideDamageAnim = from.overrideDamageAnim;
+        a.damageAnim = from.damageAnim;
         a.parryMultiplier = w.parryMultiplier;
         a.backstabMultiplier = w.backstabMultiplier;
 
@@ -104,6 +98,11 @@ public static class StaticFunctions {
 
     public static void DeepCopyWeaponStats(WeaponStats from, WeaponStats to)
     {
+        if (from == null) {
+            Debug.Log(to.weaponId + " weapon stats weren't found, assigning everything as zero");
+            return;
+        }
+        
         to.physical = from.physical;
         to.strike = from.strike;
         to.slash = from.slash;
@@ -146,7 +145,7 @@ public static class StaticFunctions {
     {
         for (int i = 0; i < actions.Count; i++)
         {
-            if (actions[i].input == input)
+            if (actions[i].GetFirstInput() == input)
             {
                 return actions[i];
             }

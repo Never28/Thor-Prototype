@@ -145,8 +145,9 @@ public class EnemyStates : MonoBehaviour {
         if (isInvincible)
             return;
 
-        int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats);
-        
+        //int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats);
+        int damage = 5;
+
         characterStats.poise += damage;
         health -= damage;
         
@@ -196,7 +197,8 @@ public class EnemyStates : MonoBehaviour {
 
     public void IsGettingParried(Action a, Weapon w)
     {
-        int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats, a.parryMultiplier);
+        //int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats, a.parryMultiplier);
+        int damage = 5;
         health -= damage;
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);
@@ -205,7 +207,8 @@ public class EnemyStates : MonoBehaviour {
 
     public void IsGettingBackstabbed(Action a, Weapon w)
     {
-        int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats, a.backstabMultiplier);
+        //int damage = StatsCalculations.CalculateBaseDamage(w.weaponStats, characterStats, a.backstabMultiplier);
+        int damage = 5;
         health -= damage;
         dontDoAnything = true;
         anim.SetBool(StaticStrings.canMove, false);
