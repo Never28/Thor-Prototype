@@ -12,8 +12,15 @@ public class UIManager : MonoBehaviour {
     public Slider stamina;
     public Slider staminaVisualizer;
 
+    int curSouls;
+
+    public Text souls;
     public float sizeMultiplier = 2;
-    public float visualizerSpeed = 2;
+    public float lerpSpeed = 2;
+
+    public void InitSouls(int v) {
+        curSouls = v;
+    }
 
     public void InitSlider(StatSlider slider, int value) {
 
@@ -49,13 +56,16 @@ public class UIManager : MonoBehaviour {
     }
 
     public void Tick(CharacterStats stats, float delta) {
-        health.value = stats._health;
-        focus.value = stats._focus;
+        health.value = Mathf.Lerp(health.value, stats._health, delta * lerpSpeed * 2);
+        focus.value = Mathf.Lerp(focus.value, stats._focus, delta * lerpSpeed * 2);
         stamina.value = stats._stamina;
+        souls.text = stats._souls.ToString();
 
-        healthVisualizer.value = Mathf.Lerp(healthVisualizer.value, stats._health, delta * visualizerSpeed);
-        focusVisualizer.value = Mathf.Lerp(focusVisualizer.value, stats._focus, delta * visualizerSpeed);
-        staminaVisualizer.value = Mathf.Lerp(staminaVisualizer.value, stats._stamina, delta * visualizerSpeed);
+        curSouls = Mathf.RoundToInt(Mathf.Lerp(curSouls, stats._souls, delta * lerpSpeed));
+        souls.text = curSouls.ToString();
+        healthVisualizer.value = Mathf.Lerp(healthVisualizer.value, stats._health, delta * lerpSpeed);
+        focusVisualizer.value = Mathf.Lerp(focusVisualizer.value, stats._focus, delta * lerpSpeed);
+        staminaVisualizer.value = Mathf.Lerp(staminaVisualizer.value, stats._stamina, delta * lerpSpeed);
     }
 
     public void AffectAll(int h, int f, int s) {

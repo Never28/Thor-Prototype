@@ -107,8 +107,9 @@ public class StateManager : MonoBehaviour
         anim.SetBool(StaticStrings.onGround, true);
 
         characterStats.InitCurrent();
-
-        UIManager.singleton.AffectAll(characterStats.health, characterStats.focus, characterStats.stamina);
+        UIManager UI = UIManager.singleton;
+        UI.AffectAll(characterStats.health, characterStats.focus, characterStats.stamina);
+        UI.InitSouls(characterStats._souls);
     }
 
     void SetupAnimator()
@@ -141,6 +142,10 @@ public class StateManager : MonoBehaviour
         anim.SetBool(StaticStrings.spellCasting, isSpellCasting);
         if (inventoryManager.rightHandWeapon != null)
             inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
+        if (inventoryManager.currentConsumable != null) {
+            if (inventoryManager.currentConsumable.itemModel != null)
+                inventoryManager.currentConsumable.itemModel.SetActive(usingItem);
+        }
 
         if (!isBlocking && !isSpellCasting)
         {
@@ -190,7 +195,7 @@ public class StateManager : MonoBehaviour
         if (canAttack) {
             DetectAction();
         }
-        if (!canMove)
+        if (canMove)
         {
             DetectItemAction();        
         }
@@ -276,8 +281,14 @@ public class StateManager : MonoBehaviour
         if (!itemInput)
             return;
 
-        ItemAction slot = actionManager.consumableItem;
-        string targetAnim = slot.targetAnim;
+        if (inventoryManager.currentConsumable == null)
+            return;
+
+        if (inventoryManager.currentConsumable.itemCount < 1 && !inventoryManager.currentConsumable.unlimitedCount)
+            return;
+
+        RuntimeConsumable slot = inventoryManager.currentConsumable;
+        string targetAnim = slot.instance.targetAnim;
 
         if (string.IsNullOrEmpty(targetAnim))
             return;
@@ -766,6 +777,9 @@ public class StateManager : MonoBehaviour
     public void HandleTwoHanded() 
     {
         bool isRight = true;
+        if (inventoryManager.rightHandWeapon == null)
+            return;
+
         Weapon w = inventoryManager.rightHandWeapon.instance;
         if (w == null) {
             w = inventoryManager.leftHandWeapon.instance;

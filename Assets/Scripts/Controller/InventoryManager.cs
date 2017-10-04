@@ -10,17 +10,21 @@ public class InventoryManager : MonoBehaviour {
     public List<string> rh_weapons;
     public List<string> lh_weapons;
     public List<string> spell_items;
+    public List<string> consumable_items;
 
     public int r_index;
     public int l_index;
     public int s_index;
+    public int c_index;
     List<RuntimeWeapon> r_r_weapons = new List<RuntimeWeapon>();
     List<RuntimeWeapon> r_l_weapons = new List<RuntimeWeapon>();
     List<RuntimeSpellItem> r_spells = new List<RuntimeSpellItem>();
+    List<RuntimeConsumable> r_consumables = new List<RuntimeConsumable>();
 
     public RuntimeWeapon rightHandWeapon;
     public RuntimeWeapon leftHandWeapon;
     public RuntimeSpellItem currentSpell;
+    public RuntimeConsumable currentConsumable;
     public bool hasLeftHandWeapon = true;
 
     public GameObject parryCollider;
@@ -42,6 +46,7 @@ public class InventoryManager : MonoBehaviour {
     }
 
     public void LoadInventory() {
+
         unarmedRuntime = WeaponToRuntimeWeapon(ResourcesManager.singleton.GetWeapon(unarmedId), false);
 
         for (int i = 0; i < rh_weapons.Count; i++)
@@ -84,7 +89,19 @@ public class InventoryManager : MonoBehaviour {
                 s_index = 0;
             EquipSpell(r_spells[s_index]);
         }
-        
+
+        for (int i = 0; i < consumable_items.Count; i++)
+        {
+            RuntimeConsumable c = ConsumableToRuntimeConsumable(ResourcesManager.singleton.GetConsumable(consumable_items[i]));
+            r_consumables.Add(c);
+        }
+
+        if (r_consumables.Count > 0) {
+            if (c_index > r_consumables.Count - 1)
+                c_index = 0;
+            EquipConsumable(r_consumables[c_index]);
+        }
+
         hasLeftHandWeapon = (leftHandWeapon != null);
 
         InitAllDamageColliders(states);
@@ -129,6 +146,14 @@ public class InventoryManager : MonoBehaviour {
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
         uiSlot.UpdateSlot(UI.QSlotType.spell, s.instance.icon);
+    }
+
+    public void EquipConsumable(RuntimeConsumable c)
+    {
+        currentConsumable = c;
+
+        UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
+        uiSlot.UpdateSlot(UI.QSlotType.item, c.instance.icon);
     }
 
     public Weapon GetCurrentWeapon(bool isLeft) {
@@ -218,6 +243,33 @@ public class InventoryManager : MonoBehaviour {
         return inst;
     }
 
+    public RuntimeConsumable ConsumableToRuntimeConsumable(Consumable c) {
+        GameObject go = new GameObject();
+        RuntimeConsumable inst = go.AddComponent<RuntimeConsumable>();
+
+        inst.instance = new Consumable();
+        StaticFunctions.DeepCopyConsumable(inst.instance, c);
+        go.name = c.itemName;
+
+        if (inst.instance.itemPrefab != null) {
+            GameObject model = Instantiate(inst.instance.itemPrefab) as GameObject;
+            Transform p = states.anim.GetBoneTransform(HumanBodyBones.RightHand);
+            model.transform.parent = p;
+            model.transform.localPosition = inst.instance.r_model_pos;
+            model.transform.localEulerAngles = inst.instance.r_model_eulers;
+
+            Vector3 targetScale = inst.instance.model_scale;
+            if (targetScale == Vector3.zero)
+                targetScale = Vector3.one;
+            model.transform.localScale = targetScale;
+
+            inst.itemModel = model;
+            inst.itemModel.SetActive(false);
+        }
+
+        return inst;
+    }
+
     public void CreateSpellParticle(RuntimeSpellItem inst, bool isLeft = false, bool parentUnderRoot = false) {
         if (inst.currentParticle == null) {
             inst.currentParticle = Instantiate(inst.instance.particlePrefab) as GameObject;
@@ -245,6 +297,8 @@ public class InventoryManager : MonoBehaviour {
 
         if (isLeft)
         {
+            if (r_l_weapons.Count == 0)
+                return;
             if (l_index < r_l_weapons.Count - 1)
             {
                 l_index++;
@@ -256,7 +310,9 @@ public class InventoryManager : MonoBehaviour {
 
             EquipWeapon(r_l_weapons[l_index], true);
         }
-        else { 
+        else {
+            if (r_r_weapons.Count == 0)
+                return;
             if (r_index < r_r_weapons.Count - 1)
             {
                 r_index++;
@@ -279,10 +335,24 @@ public class InventoryManager : MonoBehaviour {
         }
         else
         {
-            l_index = 0;
+            s_index = 0;
         }
 
         EquipSpell(r_spells[s_index]);
+    }
+
+    public void ChangeToNextConsumable()
+    {
+        if (c_index < r_consumables.Count - 1)
+        {
+            c_index++;
+        }
+        else
+        {
+            c_index = 0;
+        }
+
+        EquipConsumable(r_consumables[c_index]);
     }
     
     #region Delegate Calls
@@ -376,3 +446,13 @@ public class Spell : Item {
     }
 }
 
+[System.Serializable]
+public class Consumable : Item {
+    public string consumableEffect;
+    public string targetAnim;
+    public GameObject itemPrefab; 
+
+    public Vector3 r_model_pos;
+    public Vector3 r_model_eulers;
+    public Vector3 model_scale;
+}

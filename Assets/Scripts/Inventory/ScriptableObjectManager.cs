@@ -22,9 +22,9 @@ public static class ScriptableObjectManager {
         }
     }
 
-    [MenuItem("Assets/Inventory/CreateInventory")]
-    public static void CreateInventory() { 
-        
+    [MenuItem("Assets/Inventory/CreateConsumables")]
+    public static void CreateConsumables() {
+        ScriptableObjectManager.CreateAsset<ConsumableScriptableObject>();
     }
 
     [MenuItem("Assets/Inventory/CreateWeapons")]

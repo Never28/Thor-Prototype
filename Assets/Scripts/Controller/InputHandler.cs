@@ -190,6 +190,13 @@ public class InputHandler : MonoBehaviour
             }
         }
 
+        if (d_up) {
+            if (!prev_d_down) {
+                prev_d_down = true;
+                states.inventoryManager.ChangeToNextConsumable();
+            }
+        }   
+
 
         if (!d_up)
             prev_d_up = false;
@@ -198,8 +205,8 @@ public class InputHandler : MonoBehaviour
 
         if (!states.onEmpty)
             return;
-        if (states.isTwoHanded)
-            return;
+        //if (states.isTwoHanded)
+        //    return;
 
         if (d_left)
         {

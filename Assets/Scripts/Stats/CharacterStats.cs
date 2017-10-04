@@ -9,6 +9,10 @@ public class CharacterStats {
     public float _health;
     public float _focus;
     public float _stamina;
+    public int _souls;
+
+    public float _healthRecoverValue = 60;
+    public float _focusRecoverValue = 80;
 
     [Header("Base Power")]
     public int health = 100;

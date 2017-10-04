@@ -6,7 +6,6 @@ public class ActionManager : MonoBehaviour {
 
     public int actionIndex;
     public List<Action> actionSlots = new List<Action>();
-    public ItemAction consumableItem;
 
     StateManager states;
 
@@ -201,10 +200,4 @@ public class SpellAction {
     public float castTime;
     public float focusCost;
     public float staminaCost;
-}
-
-[System.Serializable]
-public class ItemAction {
-    public string targetAnim;
-    public string itemId;
 }

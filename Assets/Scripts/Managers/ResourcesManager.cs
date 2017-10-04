@@ -7,12 +7,16 @@ public class ResourcesManager : MonoBehaviour {
     Dictionary<string, int> weaponIds = new Dictionary<string, int>();
     Dictionary<string, int> spellIds = new Dictionary<string, int>();
     Dictionary<string, int> weaponStatsIds = new Dictionary<string, int>();
+    Dictionary<string, int> consumableIds = new Dictionary<string, int>();
 
     public static ResourcesManager singleton;
+
+    //Init
     void Awake() {
         singleton = this;
         LoadWeaponIds();
         LoadSpellIds();
+        LoadConsumableIds();
     }
 
     void LoadSpellIds() {
@@ -68,16 +72,31 @@ public class ResourcesManager : MonoBehaviour {
         }
     }
 
-    int GetSpellIdFromString(string id)
+    void LoadConsumableIds()
     {
-        int index = -1;
-        if (spellIds.TryGetValue(id, out index))
+        ConsumableScriptableObject obj = Resources.Load("ConsumableScriptableObject") as ConsumableScriptableObject;
+
+        if (obj == null)
         {
-            return index;
+            Debug.Log("ConsumableScriptableObject could not be loaded");
+            return;
         }
-        return -1;
+
+        for (int i = 0; i < obj.consumables.Count; i++)
+        {
+            if (consumableIds.ContainsKey(obj.consumables[i].itemName))
+            {
+                Debug.Log(obj.consumables[i].itemName + " item is a duplicate");
+            }
+            else
+            {
+                consumableIds.Add(obj.consumables[i].itemName, i);
+            }
+        }
+
     }
 
+    //Weapons
     int GetWeaponIdFromString(string id) {
         int index = -1;
         if (weaponIds.TryGetValue(id, out index))
@@ -95,26 +114,6 @@ public class ResourcesManager : MonoBehaviour {
             return index;
         }
         return -1;
-    }
-
-    public Spell GetSpell(string id)
-    {
-
-        SpellItemScriptableObject obj = Resources.Load("SpellItemScriptableObject") as SpellItemScriptableObject;
-
-        if (obj == null)
-        {
-            Debug.Log("SpellItemScriptableObject could not be loaded");
-            return null;
-        }
-
-        int index = GetSpellIdFromString(id);
-
-        if (index == -1)
-            return null;
-
-        return obj.spells[index];
-
     }
 
     public Weapon GetWeapon(string id) {
@@ -155,4 +154,67 @@ public class ResourcesManager : MonoBehaviour {
         return obj.weaponStats[index];
 
     }
+
+    //Spells
+    int GetSpellIdFromString(string id)
+    {
+        int index = -1;
+        if (spellIds.TryGetValue(id, out index))
+        {
+            return index;
+        }
+        return -1;
+    }
+
+    public Spell GetSpell(string id)
+    {
+
+        SpellItemScriptableObject obj = Resources.Load("SpellItemScriptableObject") as SpellItemScriptableObject;
+
+        if (obj == null)
+        {
+            Debug.Log("SpellItemScriptableObject could not be loaded");
+            return null;
+        }
+
+        int index = GetSpellIdFromString(id);
+
+        if (index == -1)
+            return null;
+
+        return obj.spells[index];
+
+    }
+
+    //Consumables
+    int GetConsumableIdFromString(string id)
+    {
+        int index = -1;
+        if (consumableIds.TryGetValue(id, out index))
+        {
+            return index;
+        }
+        return -1;
+    }
+
+    public Consumable GetConsumable(string id)
+    {
+
+        ConsumableScriptableObject obj = Resources.Load("ConsumableScriptableObject") as ConsumableScriptableObject;
+
+        if (obj == null)
+        {
+            Debug.Log("ConsumableScriptableObject could not be loaded");
+            return null;
+        }
+
+        int index = GetConsumableIdFromString(id);
+
+        if (index == -1)
+            return null;
+
+        return obj.consumables[index];
+
+    }
+
 }

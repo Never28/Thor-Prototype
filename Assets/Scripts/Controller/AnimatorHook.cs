@@ -239,4 +239,13 @@ public class AnimatorHook : MonoBehaviour
         if (states)
             states.canRotate = false;
     }
+
+    public void ConsumeCurrentItem() {
+        if (states) {
+            if (states.inventoryManager.currentConsumable) {
+                states.inventoryManager.currentConsumable.itemCount--;
+                ItemEffectManager.singleton.CastEffect(states.inventoryManager.currentConsumable.instance.consumableEffect, states);
+            }
+        }
+    }
 }
