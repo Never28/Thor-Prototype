@@ -51,6 +51,8 @@ public static class StaticFunctions {
         to.canBackstab = from.canBackstab;
         to.overrideDamageAnim = from.overrideDamageAnim;
         to.damageAnim = from.damageAnim;
+        to.overrideKick = from.overrideKick;
+        to.kickAnim = from.kickAnim;
 
         DeepCopySteps(from, to);
     }
@@ -89,7 +91,8 @@ public static class StaticFunctions {
         a.damageAnim = from.damageAnim;
         a.parryMultiplier = w.parryMultiplier;
         a.backstabMultiplier = w.backstabMultiplier;
-
+        a.overrideKick = from.overrideKick;
+        a.kickAnim = from.kickAnim;
         if (isLeftHand)
         {
             a.mirror = true;

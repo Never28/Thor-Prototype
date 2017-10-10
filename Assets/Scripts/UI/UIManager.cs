@@ -14,6 +14,12 @@ public class UIManager : MonoBehaviour {
 
     int curSouls;
 
+    public GesturesManager gestures;
+
+    void Start() {
+        gestures = GesturesManager.singleton;
+    }
+
     public Text souls;
     public float sizeMultiplier = 2;
     public float lerpSpeed = 2;

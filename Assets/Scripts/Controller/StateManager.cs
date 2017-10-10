@@ -16,6 +16,7 @@ public class StateManager : MonoBehaviour
     public float horizontal;
     public float vertical;
     public float moveAmount;
+    public float moveAmountThreshold = 0.05f;
     public Vector3 moveDir;
     public bool rt, rb, lt, lb;
     public bool rollInput;
@@ -48,6 +49,7 @@ public class StateManager : MonoBehaviour
     public bool isBlocking;
     public bool isLeftHand;
     public bool onEmpty;
+    public bool closeWeapons;
 
     [Header("Other")]
     public EnemyTarget lockonTarget;
@@ -80,6 +82,10 @@ public class StateManager : MonoBehaviour
     public ActionInput storeActionInput;
 
     float _actionDelay;
+    float _kickTimer;
+    public bool canKick;
+    public bool holdKick;
+    public float kickMaxTime = 0.08f;
 
     public void Init()
     {
@@ -140,11 +146,23 @@ public class StateManager : MonoBehaviour
         isBlocking = false;
         usingItem = anim.GetBool(StaticStrings.interacting);
         anim.SetBool(StaticStrings.spellCasting, isSpellCasting);
-        if (inventoryManager.rightHandWeapon != null)
-            inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
-        if (inventoryManager.currentConsumable != null) {
-            if (inventoryManager.currentConsumable.itemModel != null)
-                inventoryManager.currentConsumable.itemModel.SetActive(usingItem);
+        if (!closeWeapons)
+        {
+            if (inventoryManager.rightHandWeapon != null)
+                inventoryManager.rightHandWeapon.weaponModel.SetActive(!usingItem);
+            if (inventoryManager.leftHandWeapon != null)
+                inventoryManager.leftHandWeapon.weaponModel.SetActive(true);
+            if (inventoryManager.currentConsumable != null)
+            {
+                if (inventoryManager.currentConsumable.itemModel != null)
+                    inventoryManager.currentConsumable.itemModel.SetActive(usingItem);
+            }
+        }
+        else {
+            if (inventoryManager.leftHandWeapon != null)
+                inventoryManager.leftHandWeapon.weaponModel.SetActive(false);
+            if (inventoryManager.rightHandWeapon != null)
+                inventoryManager.rightHandWeapon.weaponModel.SetActive(false);
         }
 
         if (!isBlocking && !isSpellCasting)
@@ -185,12 +203,15 @@ public class StateManager : MonoBehaviour
             return;
         }
 
+        closeWeapons = false;
         if (canMove && !onEmpty) {
             if (moveAmount > 0.3f) {
                 anim.CrossFade("Empty Override", 0.1f);
                 onEmpty = true;
             }
         }
+
+        MonitorKick();
 
         if (canAttack) {
             DetectAction();
@@ -336,6 +357,45 @@ public class StateManager : MonoBehaviour
                 break;
         }
     }
+    
+    void MonitorKick() {
+        if (!holdKick)
+        {
+            if (moveAmount > moveAmountThreshold)
+            {
+                _kickTimer += delta;
+                if (_kickTimer < kickMaxTime)
+                {
+                    canKick = true;
+                }
+                else
+                {
+                    _kickTimer = kickMaxTime;
+                    holdKick = true;
+                    canKick = false;
+                }
+            }
+            else {
+                _kickTimer -= delta * 0.5f;
+                if (_kickTimer < 0)
+                {
+                    _kickTimer = 0;
+                    canKick = false;
+                }
+            }
+        }
+        else {
+            if (moveAmount < moveAmountThreshold)
+            {
+                _kickTimer -= delta;
+                if (_kickTimer < 0) {
+                    _kickTimer = 0;
+                    holdKick = false;
+                    canKick = false;
+                }
+            }
+        }
+    }
 
     void AttackAction(Action slot) {
 
@@ -346,7 +406,18 @@ public class StateManager : MonoBehaviour
             return;
         if (CheckForBackstab(slot))
             return;
+        if (slot.firstStep.input == ActionInput.rb) {
+            if (canKick)
+            {
+                string kickAnim = "kick 1";
+                if (slot.overrideKick)
+                    kickAnim = slot.kickAnim;
 
+                PlayAnimation(kickAnim, false);
+                _kickTimer = 0;
+                return;
+            }
+        }
         string targetAnim = null;
         targetAnim = slot.GetActionStep(ref actionManager.actionIndex).targetAnim; ;
 
@@ -355,10 +426,6 @@ public class StateManager : MonoBehaviour
 
         currentAction = slot;
 
-        canAttack = false;
-        onEmpty = false;
-        canMove = false;
-        inAction = true;
         float targetSpeed = 1;
         if (slot.changeSpeed)
         {
@@ -367,8 +434,7 @@ public class StateManager : MonoBehaviour
                 targetSpeed = 1;
         }
         anim.SetFloat(StaticStrings.animSpeed, targetSpeed);
-        anim.SetBool(StaticStrings.mirror, slot.mirror);
-        anim.CrossFade(targetAnim, 0.2f);
+        PlayAnimation(targetAnim, slot.mirror);
         characterStats._stamina -= slot.staminaCost;
     }
 
@@ -376,11 +442,8 @@ public class StateManager : MonoBehaviour
         if(characterStats._stamina < slot.staminaCost)
             return;
         if (slot.spellClass != inventoryManager.currentSpell.instance.spellClass || characterStats._focus < slot.focusCost) {
-            anim.SetBool(StaticStrings.mirror, slot.mirror);
-            anim.CrossFade("cant_spell", 0.2f);
-            canAttack = false;
-            canMove = false;
-            inAction = true;
+            PlayAnimation("cant_spell", slot.mirror);
+            return;
         }
 
         ActionInput inp = actionManager.GetActionInput(this);
@@ -423,6 +486,17 @@ public class StateManager : MonoBehaviour
 
         if (spellCast_Start != null)
             spellCast_Start();
+    }
+
+    public void PlayAnimation(string targetAnim, bool isMirrored) {
+        canAttack = false;
+        onEmpty = false;
+        canMove = false;
+        inAction = true;
+        canKick = false;
+   
+        anim.SetBool(StaticStrings.mirror, isMirrored);
+        anim.CrossFade(targetAnim, 0.2f);
     }
 
     float curFocusCost;

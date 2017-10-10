@@ -19,6 +19,7 @@ public static class StaticStrings
     public static string L = "L";
     public static string Pad_X = "Pad X";
     public static string Pad_Y = "Pad Y";
+    public static string Select = "Select";
 
     //Animator Parameters
     public static string vertical = "vertical";

@@ -133,6 +133,9 @@ public class Action {
     public float staminaCost = 5;
     public int focusCost = 0;
 
+    public bool overrideKick;
+    public string kickAnim;
+
     [HideInInspector]
     public float parryMultiplier;
     [HideInInspector]

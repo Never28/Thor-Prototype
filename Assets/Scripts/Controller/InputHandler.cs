@@ -42,6 +42,8 @@ public class InputHandler : MonoBehaviour
     CameraManager camManager;
     UIManager uiManager;
 
+    bool isGesturesOpen;
+
     float delta;
 
     void Start()
@@ -61,6 +63,7 @@ public class InputHandler : MonoBehaviour
     {
         delta = Time.fixedDeltaTime;
         GetInput();
+        HandleUI();
         UpdateStates();
         states.FixedTick(delta);
         camManager.FixedTick(delta);
@@ -105,8 +108,72 @@ public class InputHandler : MonoBehaviour
         d_down = Input.GetKeyUp(KeyCode.Alpha2) || d_y > 0;
         d_left = Input.GetKeyUp(KeyCode.Alpha3) || d_x < 0;
         d_right = Input.GetKeyUp(KeyCode.Alpha4) || d_x > 0;
+        bool gesturesMenu = Input.GetButtonUp(StaticStrings.Select);
+        if (gesturesMenu) {
+            isGesturesOpen = !isGesturesOpen;
+        }
+    }
 
-    } 
+    void HandleUI() {
+        uiManager.gestures.HandleGestures(isGesturesOpen);
+
+        if (isGesturesOpen)
+            curUIState = UIState.gestures;
+        else
+            curUIState = UIState.game;
+
+        switch (curUIState)
+        {
+            case UIState.game:
+                HandleQuickSlotChanges();
+                break;
+            case UIState.gestures:
+                HandleGesturesUI();
+                break;
+            case UIState.inventory:
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    UIState curUIState;
+    enum UIState { game,gestures,inventory}
+
+    void HandleGesturesUI() {
+        if (d_left)
+        {
+            if (!prev_d_left)
+            {
+                uiManager.gestures.SelectGestures(false);
+                prev_d_left = true;
+            }
+        }
+        if (d_right)
+        {
+            if (!prev_d_right)
+            {
+                uiManager.gestures.SelectGestures(true);
+                prev_d_right = true;
+            }
+        }
+
+        if (!d_left)
+            prev_d_left = false;
+        if (!d_right)
+            prev_d_right = false;
+
+        if (a_input) {
+            isGesturesOpen = false;
+            states.usingItem = true;
+
+            if (uiManager.gestures.closeWeapons) {
+                states.closeWeapons = true;
+            }
+            states.PlayAnimation(uiManager.gestures.gestureAnim, false);
+        }
+    }
 
     void UpdateStates()
     {
@@ -174,8 +241,6 @@ public class InputHandler : MonoBehaviour
             camManager.lockOn = states.lockOn;
         }
 
-        HandleQuickSlotChanges();
-
     }
 
     void HandleQuickSlotChanges() {
@@ -214,7 +279,6 @@ public class InputHandler : MonoBehaviour
             {
                 states.inventoryManager.ChangeToNextWeapon(true);
                 prev_d_left = true;
-
             }
         }
         if (d_right)
@@ -223,12 +287,9 @@ public class InputHandler : MonoBehaviour
             {
                 states.inventoryManager.ChangeToNextWeapon(false);
                 prev_d_right = true;
-
             }
         }
-
-
-
+        
         if (!d_left)
             prev_d_left = false;
         if (!d_right)
