@@ -71,6 +71,16 @@ public class CharacterStats {
     }
 }
 
+
+public enum AttributeType
+{
+    level, vigor, attunement, endurance, vitality, strenght, dexterity, intelligence, faith, luck, hp, fp, stamina, equip_load, poise, item_discovery, attunement_slots
+}
+
+public enum AttackDefenseType { 
+    physical, magic, fire, lightning, dark, critical, stability, bleed, curse, frost, magicBuff
+}
+
 [System.Serializable]
 public class Attributes {
     public int level = 1;
