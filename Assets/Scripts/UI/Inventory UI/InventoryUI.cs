@@ -14,6 +14,10 @@ namespace UI {
 
         public GameObject gameMenu, inventory, centerMain, centerRight, centerOverlay;
 
+        List<IconBase> iconSlotsCreated = new List<IconBase>();
+
+        #region Init        
+        
         void Start() {
             CreateUIElements();
         }
@@ -201,10 +205,59 @@ namespace UI {
             g.SetActive(true);
             g.transform.localScale = Vector3.one;
         }
-
+        #endregion
 
         public UIState curState;
-    
+        
+        public void LoadCurrentItems(ItemType t) {
+            List<Item> itemList = SessionManager.singleton.GetItems(t);
+
+            if (itemList == null)
+                return;
+            if (itemList.Count == 0)
+                return;
+
+            GameObject prefab = eq_left.inventory.slotTemplate;
+            Transform p = eq_left.inventory.slotGrid;
+
+            int dif = iconSlotsCreated.Count - itemList.Count;
+            int extra = (dif > 0) ? dif : 0;
+            for (int i = 0; i < itemList.Count + extra; i++)
+            {
+                if (i > itemList.Count - 1) {
+                    iconSlotsCreated[i].gameObject.SetActive(false);
+                    continue;
+                }
+                IconBase icon = null;
+                if (iconSlotsCreated.Count - 1 < i)
+                {
+                    GameObject g = Instantiate(prefab) as GameObject;
+                    g.SetActive(true);
+                    g.transform.SetParent(p);
+                    g.transform.localScale = Vector3.one;
+                    icon = g.GetComponent<IconBase>();
+                    iconSlotsCreated.Add(icon);
+                }
+                else {
+                    icon = iconSlotsCreated[i];
+                }
+                icon.gameObject.SetActive(true);
+                icon.icon.enabled = true;
+                icon.icon.sprite = itemList[i].icon;
+                icon.id = itemList[i].item_id;
+            }
+        }
+
+        public ItemType typeDebug;
+
+        public bool load;
+        void Update() {
+            if (load) { 
+                load = false;
+                LoadCurrentItems(typeDebug);
+            }
+        }
+
         public void Tick() { 
         
         }

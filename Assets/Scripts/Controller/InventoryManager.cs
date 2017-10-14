@@ -135,7 +135,7 @@ public class InventoryManager : MonoBehaviour {
         states.anim.Play(targetIdle);
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
-        Item i = ResourcesManager.singleton.GetItem(w.instance.item_id, ResourcesManager.ItemType.weapon);
+        Item i = ResourcesManager.singleton.GetItem(w.instance.item_id, ItemType.weapon);
         uiSlot.UpdateSlot((isLeft) ? UI.QSlotType.lh : UI.QSlotType.rh, i.icon);
         w.weaponModel.SetActive(true);
     }
@@ -145,7 +145,7 @@ public class InventoryManager : MonoBehaviour {
         currentSpell = s;
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
-        Item i = ResourcesManager.singleton.GetItem(s.instance.item_id, ResourcesManager.ItemType.spell);
+        Item i = ResourcesManager.singleton.GetItem(s.instance.item_id, ItemType.spell);
         uiSlot.UpdateSlot(UI.QSlotType.spell, i.icon); //pass icon
     }
 
@@ -155,7 +155,7 @@ public class InventoryManager : MonoBehaviour {
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
 
-        Item i = ResourcesManager.singleton.GetItem(c.instance.item_id, ResourcesManager.ItemType.consum);
+        Item i = ResourcesManager.singleton.GetItem(c.instance.item_id, ItemType.consum);
         uiSlot.UpdateSlot(UI.QSlotType.item, i.icon);
     }
 

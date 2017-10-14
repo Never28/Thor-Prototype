@@ -14,6 +14,7 @@ public class ResourcesManager : MonoBehaviour {
 
     public static ResourcesManager singleton;
 
+    #region Init
     //Init
     void Awake() {
         singleton = this;
@@ -143,6 +144,18 @@ public class ResourcesManager : MonoBehaviour {
         }
 
     }
+    #endregion
+
+    public List<Item> GetAllItemsFromList(List<string> l, ItemType t) {
+        List<Item> r = new List<Item>();
+        for (int i = 0; i < l.Count; i++)
+        {
+            Item it = GetItem(l[i], t);
+            r.Add(it);
+        }
+
+        return r;
+    }
 
     int GetIndexFromString(Dictionary<string, int> d, string id)
     {
@@ -150,11 +163,7 @@ public class ResourcesManager : MonoBehaviour {
         d.TryGetValue(id, out index);
         return index;
     }
-
-    public enum ItemType { 
-        weapon, spell, consum,equipment
-    }
-
+    
     public Item GetItem(string id, ItemType type) {
         ItemsScriptablesObject obj = Resources.Load("ItemsScriptablesObject") as ItemsScriptablesObject;
 
@@ -281,4 +290,9 @@ public class ResourcesManager : MonoBehaviour {
 
     }
 
+}
+
+public enum ItemType
+{
+    weapon, spell, consum, equipment
 }
