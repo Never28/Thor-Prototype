@@ -135,8 +135,8 @@ public class InventoryManager : MonoBehaviour {
         states.anim.Play(targetIdle);
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
-
-        uiSlot.UpdateSlot((isLeft) ? UI.QSlotType.lh : UI.QSlotType.rh, w.instance.icon);
+        Item i = ResourcesManager.singleton.GetItem(w.instance.item_id, ResourcesManager.ItemType.weapon);
+        uiSlot.UpdateSlot((isLeft) ? UI.QSlotType.lh : UI.QSlotType.rh, i.icon);
         w.weaponModel.SetActive(true);
     }
 
@@ -145,7 +145,8 @@ public class InventoryManager : MonoBehaviour {
         currentSpell = s;
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
-        uiSlot.UpdateSlot(UI.QSlotType.spell, s.instance.icon);
+        Item i = ResourcesManager.singleton.GetItem(s.instance.item_id, ResourcesManager.ItemType.spell);
+        uiSlot.UpdateSlot(UI.QSlotType.spell, i.icon); //pass icon
     }
 
     public void EquipConsumable(RuntimeConsumable c)
@@ -153,7 +154,9 @@ public class InventoryManager : MonoBehaviour {
         currentConsumable = c;
 
         UI.QuickSlot uiSlot = UI.QuickSlot.singleton;
-        uiSlot.UpdateSlot(UI.QSlotType.item, c.instance.icon);
+
+        Item i = ResourcesManager.singleton.GetItem(c.instance.item_id, ResourcesManager.ItemType.consum);
+        uiSlot.UpdateSlot(UI.QSlotType.item, i.icon);
     }
 
     public Weapon GetCurrentWeapon(bool isLeft) {
@@ -196,13 +199,13 @@ public class InventoryManager : MonoBehaviour {
     public RuntimeWeapon WeaponToRuntimeWeapon(Weapon w, bool isLeft = false) {
         GameObject go = new GameObject();
         RuntimeWeapon inst = go.AddComponent<RuntimeWeapon>();
-        go.name = w.itemName;
+        go.name = w.item_id;
 
         inst.instance = new Weapon();
         StaticFunctions.DeepCopyWeapon(w, inst.instance);
 
         inst.weaponStats = new WeaponStats();
-        WeaponStats w_stats = ResourcesManager.singleton.GetWeaponStats(w.itemName);
+        WeaponStats w_stats = ResourcesManager.singleton.GetWeaponStats(w.item_id);
         StaticFunctions.DeepCopyWeaponStats(w_stats, inst.weaponStats);
 
         inst.weaponModel = Instantiate(inst.instance.modelPrefab) as GameObject;
@@ -236,7 +239,7 @@ public class InventoryManager : MonoBehaviour {
 
         inst.instance = new Spell();
         StaticFunctions.DeepCopySpell(s, inst.instance);
-        go.name = s.itemName;
+        go.name = s.item_id;
 
 
         r_spells.Add(inst);
@@ -249,7 +252,7 @@ public class InventoryManager : MonoBehaviour {
 
         inst.instance = new Consumable();
         StaticFunctions.DeepCopyConsumable(inst.instance, c);
-        go.name = c.itemName;
+        go.name = c.item_id;
 
         if (inst.instance.itemPrefab != null) {
             GameObject model = Instantiate(inst.instance.itemPrefab) as GameObject;
@@ -381,7 +384,8 @@ public class InventoryManager : MonoBehaviour {
 
 [System.Serializable]
 public class Item {
-    public string itemName;
+    public string item_id;
+    public string name_item;
     public string itemDescription;
     public Sprite icon;
 
@@ -389,8 +393,9 @@ public class Item {
 }
 
 [System.Serializable]
-public class Weapon : Item
+public class Weapon
 {
+    public string item_id;
     public string oh_idle;
     public string th_idle;
 
@@ -423,7 +428,8 @@ public class Weapon : Item
 }
 
 [System.Serializable]
-public class Spell : Item {
+public class Spell {
+    public string item_id;
     public SpellType spellType;
     public SpellClass spellClass;
     public List<SpellAction> spellActions = new List<SpellAction>(); 
@@ -447,7 +453,8 @@ public class Spell : Item {
 }
 
 [System.Serializable]
-public class Consumable : Item {
+public class Consumable {
+    public string item_id;
     public string consumableEffect;
     public string targetAnim;
     public GameObject itemPrefab; 

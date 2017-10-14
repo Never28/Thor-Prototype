@@ -50,7 +50,7 @@ namespace Utilities {
 
             for (int i = 0; i < obj.weapons.Count; i++)
             {
-                if (obj.weapons[i].itemName == itemId)
+                if (obj.weapons[i].item_id == itemId)
                 {
                     Weapon w = obj.weapons[i];
                     if (leftHand)
@@ -88,7 +88,7 @@ namespace Utilities {
 
             for (int i = 0; i < obj.consumables.Count; i++) 
             {
-                if (obj.consumables[i].itemName == itemId)
+                if (obj.consumables[i].item_id == itemId)
                 {
                     Consumable c = obj.consumables[i];
                     c.r_model_eulers = itemModel.transform.localEulerAngles;

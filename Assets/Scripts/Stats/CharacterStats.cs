@@ -78,7 +78,11 @@ public enum AttributeType
 }
 
 public enum AttackDefenseType { 
-    physical, magic, fire, lightning, dark, critical, stability, bleed, curse, frost, magicBuff
+    physical, magic, fire, lightning, dark, critical, stability, bleed, curse, frost, magicBuff, strike, slash, thrust, poison 
+}
+
+public enum WeaponDamageType { 
+    sum, vs_strike, vs_slash, vs_thrust
 }
 
 [System.Serializable]

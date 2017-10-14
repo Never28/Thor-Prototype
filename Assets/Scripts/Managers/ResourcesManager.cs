@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class ResourcesManager : MonoBehaviour {
 
+    Dictionary<string, int> i_spells = new Dictionary<string, int>();
+    Dictionary<string, int> i_weapons = new Dictionary<string, int>();
+    Dictionary<string, int> i_cons = new Dictionary<string, int>();
     Dictionary<string, int> weaponIds = new Dictionary<string, int>();
     Dictionary<string, int> spellIds = new Dictionary<string, int>();
     Dictionary<string, int> weaponStatsIds = new Dictionary<string, int>();
@@ -14,9 +17,54 @@ public class ResourcesManager : MonoBehaviour {
     //Init
     void Awake() {
         singleton = this;
+        LoadItemIds();
         LoadWeaponIds();
         LoadSpellIds();
         LoadConsumableIds();
+    }
+
+    void LoadItemIds() {
+        ItemsScriptablesObject obj = Resources.Load("ItemsScriptablesObject") as ItemsScriptablesObject;
+
+        if (obj == null)
+        {
+            Debug.Log("ItemsScriptablesObject could not be loaded");
+            return;
+        }
+
+        for (int i = 0; i < obj.cons_items.Count; i++)
+        {
+            if (i_cons.ContainsKey(obj.cons_items[i].item_id))
+            {
+                Debug.Log(obj.cons_items[i].item_id + " item is a duplicate");
+            }
+            else
+            {
+                i_cons.Add(obj.cons_items[i].item_id, i);
+            }
+        }
+        for (int i = 0; i < obj.spell_items.Count; i++)
+        {
+            if (i_spells.ContainsKey(obj.spell_items[i].item_id))
+            {
+                Debug.Log(obj.spell_items[i].item_id + " item is a duplicate");
+            }
+            else
+            {
+                i_spells.Add(obj.spell_items[i].item_id, i);
+            }
+        }
+        for (int i = 0; i < obj.weapon_items.Count; i++)
+        {
+            if (i_weapons.ContainsKey(obj.weapon_items[i].item_id))
+            {
+                Debug.Log(obj.weapon_items[i].item_id + " item is a duplicate");
+            }
+            else
+            {
+                i_weapons.Add(obj.weapon_items[i].item_id, i);
+            }
+        }
     }
 
     void LoadSpellIds() {
@@ -29,13 +77,13 @@ public class ResourcesManager : MonoBehaviour {
 
         for (int i = 0; i < obj.spells.Count; i++)
         {
-            if (spellIds.ContainsKey(obj.spells[i].itemName))
+            if (spellIds.ContainsKey(obj.spells[i].item_id))
             {
-                Debug.Log(obj.spells[i].itemName + " item is a duplicate");
+                Debug.Log(obj.spells[i].item_id + " item is a duplicate");
             }
             else
             {
-                spellIds.Add(obj.spells[i].itemName, i);
+                spellIds.Add(obj.spells[i].item_id, i);
             }
         }
     }
@@ -51,12 +99,12 @@ public class ResourcesManager : MonoBehaviour {
 
         for (int i = 0; i < obj.weapons.Count; i++)
         {
-            if (weaponIds.ContainsKey(obj.weapons[i].itemName))
+            if (weaponIds.ContainsKey(obj.weapons[i].item_id))
             {
-                Debug.Log(obj.weapons[i].itemName + " item is a duplicate");
+                Debug.Log(obj.weapons[i].item_id + " item is a duplicate");
             }
             else {
-                weaponIds.Add(obj.weapons[i].itemName, i);
+                weaponIds.Add(obj.weapons[i].item_id, i);
             }
         }
 
@@ -84,37 +132,73 @@ public class ResourcesManager : MonoBehaviour {
 
         for (int i = 0; i < obj.consumables.Count; i++)
         {
-            if (consumableIds.ContainsKey(obj.consumables[i].itemName))
+            if (consumableIds.ContainsKey(obj.consumables[i].item_id))
             {
-                Debug.Log(obj.consumables[i].itemName + " item is a duplicate");
+                Debug.Log(obj.consumables[i].item_id + " item is a duplicate");
             }
             else
             {
-                consumableIds.Add(obj.consumables[i].itemName, i);
+                consumableIds.Add(obj.consumables[i].item_id, i);
             }
         }
+
+    }
+
+    int GetIndexFromString(Dictionary<string, int> d, string id)
+    {
+        int index = -1;
+        d.TryGetValue(id, out index);
+        return index;
+    }
+
+    public enum ItemType { 
+        weapon, spell, consum,equipment
+    }
+
+    public Item GetItem(string id, ItemType type) {
+        ItemsScriptablesObject obj = Resources.Load("ItemsScriptablesObject") as ItemsScriptablesObject;
+
+        if (obj == null)
+        {
+            Debug.Log("ItemsScriptablesObject could not be loaded");
+            return null;
+        }
+
+        Dictionary<string, int> d = null;
+        List<Item> l = null;
+
+        switch (type)
+        {
+            case ItemType.weapon:
+                d = i_weapons;
+                l = obj.weapon_items;
+                break;
+            case ItemType.spell:
+                d = i_spells;
+                l = obj.spell_items;
+                break;
+            case ItemType.consum: 
+                d = i_cons;
+                l = obj.cons_items;
+                break;
+            case ItemType.equipment:
+                break;
+            default:
+                return null;
+        }
+
+        if (d == null || l == null)
+            return null;
+
+        int index = GetIndexFromString(d, id);
+        if (index == -1)
+            return null;
+
+        return l[index];
 
     }
 
     //Weapons
-    int GetWeaponIdFromString(string id) {
-        int index = -1;
-        if (weaponIds.TryGetValue(id, out index))
-        {
-            return index;
-        }
-        return -1;
-    }
-
-    int GetWeaponStatsIdFromString(string id)
-    {
-        int index = -1;
-        if (weaponStatsIds.TryGetValue(id, out index))
-        {
-            return index;
-        }
-        return -1;
-    }
 
     public Weapon GetWeapon(string id) {
 
@@ -125,9 +209,7 @@ public class ResourcesManager : MonoBehaviour {
             Debug.Log("WeaponScriptableObject could not be loaded");
             return null;
         }
-
-        int index = GetWeaponIdFromString(id);
-
+        int index = GetIndexFromString(weaponIds, id);
         if (index == -1)
             return null;
 
@@ -146,7 +228,7 @@ public class ResourcesManager : MonoBehaviour {
             return null;
         }
 
-        int index = GetWeaponStatsIdFromString(id);
+        int index = GetIndexFromString(weaponStatsIds, id);
 
         if (index == -1)
             return null;
@@ -156,15 +238,6 @@ public class ResourcesManager : MonoBehaviour {
     }
 
     //Spells
-    int GetSpellIdFromString(string id)
-    {
-        int index = -1;
-        if (spellIds.TryGetValue(id, out index))
-        {
-            return index;
-        }
-        return -1;
-    }
 
     public Spell GetSpell(string id)
     {
@@ -177,7 +250,7 @@ public class ResourcesManager : MonoBehaviour {
             return null;
         }
 
-        int index = GetSpellIdFromString(id);
+        int index = GetIndexFromString(spellIds, id);
 
         if (index == -1)
             return null;
@@ -187,15 +260,6 @@ public class ResourcesManager : MonoBehaviour {
     }
 
     //Consumables
-    int GetConsumableIdFromString(string id)
-    {
-        int index = -1;
-        if (consumableIds.TryGetValue(id, out index))
-        {
-            return index;
-        }
-        return -1;
-    }
 
     public Consumable GetConsumable(string id)
     {
@@ -208,7 +272,7 @@ public class ResourcesManager : MonoBehaviour {
             return null;
         }
 
-        int index = GetConsumableIdFromString(id);
+        int index = GetIndexFromString(consumableIds, id);
 
         if (index == -1)
             return null;

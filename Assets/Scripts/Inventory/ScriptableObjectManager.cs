@@ -21,6 +21,12 @@ public static class ScriptableObjectManager {
             Debug.Log(typeof(T).ToString() + " already created.");
         }
     }
+    
+    [MenuItem("Assets/Inventory/CreateItems")]
+    public static void CreateItems()
+    {
+        ScriptableObjectManager.CreateAsset<ItemsScriptablesObject>();
+    }
 
     [MenuItem("Assets/Inventory/CreateConsumables")]
     public static void CreateConsumables() {

@@ -4,8 +4,8 @@ using UnityEngine;
 
 public static class StaticFunctions {
 
-    public static void DeepCopyWeapon(Weapon from, Weapon to) {
-        to.icon = from.icon;
+    public static void DeepCopyWeapon(Weapon from, Weapon to) {        
+        to.item_id = from.item_id;
         to.oh_idle = from.oh_idle;
         to.th_idle = from.th_idle;
 
@@ -117,9 +117,7 @@ public static class StaticFunctions {
     }
 
     public static void DeepCopySpell(Spell from, Spell to) {
-        to.itemName = from.itemName;
-        to.itemDescription = from.itemDescription;
-        to.icon = from.icon;
+        to.item_id = from.item_id;
         to.spellType = from.spellType;
         to.spellClass = from.spellClass;
         to.projectile = from.projectile;
@@ -160,9 +158,7 @@ public static class StaticFunctions {
     public static void DeepCopyConsumable(Consumable to, Consumable from) {
         to.consumableEffect = from.consumableEffect;
         to.targetAnim = from.targetAnim;
-        to.icon = from.icon;
-        to.itemDescription = from.itemDescription;
-        to.itemName = from.itemName;
+        to.item_id = from.item_id;
         to.itemPrefab = from.itemPrefab;
         to.model_scale = from.model_scale;
         to.r_model_eulers = from.r_model_eulers;

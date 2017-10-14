@@ -21,6 +21,7 @@ namespace UI {
         void CreateUIElements() {
             WeaponInfoInit();
             PlayerStatusInit();
+            WeaponStatusInit();
         }
 
         void WeaponInfoInit() {
@@ -51,27 +52,88 @@ namespace UI {
         }
 
         void PlayerStatusInit() {
-            CreateAttributeElement(playerStatus.attSlot, playerStatus.grid, AttributeType.level);
-            CreateEmptyElement(playerStatus.grid);
-            for (int i = 1; i < 10; i++)
-            {                
-                CreateAttributeElement(playerStatus.attSlot, playerStatus.grid, (AttributeType)i);
-            }
-            CreateEmptyElement(playerStatus.grid);
-            for (int i = 0; i < 3; i++)
-            {
-                int index = 1;
-                index += 10;
-                CreateAttributeElement(playerStatus.attSlot, playerStatus.grid, (AttributeType)i);
-            }
-            CreateEmptyElement(playerStatus.grid);
-            for (int i = 0; i < 4; i++)
-            {
-                int index = 1;
-                index += 13;
-                CreateAttributeElement(playerStatus.attSlot, playerStatus.grid, (AttributeType)i);
-            }
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.level, "Level");
+
+            CreateEmptyElement(playerStatus.attGrid);
+
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.vigor, "Vigor");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.attunement, "Attunement");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.endurance, "Endurance");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.vitality, "Vitality");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.strenght, "Strenght");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.dexterity, "Dexterity");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.intelligence, "Intelligence");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.faith, "Faith");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.luck, "Luck");
+
+            CreateEmptyElement(playerStatus.attGrid);
+
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.hp, "HP");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.fp, "FP");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.stamina, "Stamina");
+
+            CreateEmptyElement(playerStatus.attGrid);
+
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.equip_load, "Equip Load");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.poise, "Stamina");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.item_discovery, "Item Discovery");
+            CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.attunement_slots, "Attunement Slots");
         }
+
+        void WeaponStatusInit() {
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.physical, "Physical");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.strike, "Vs Strike");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.slash, "Vs Slash");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.thrust, "Vs Thrust");
+
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.magic, "Magic");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.fire, "Fire");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.lightning, "Lightning");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.dark, "Dark");
+
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.resGrid, AttackDefenseType.bleed, "Bleed");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.resGrid, AttackDefenseType.poison, "Poison");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.resGrid, AttackDefenseType.frost, "Frost");
+            CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.resGrid, AttackDefenseType.curse, "Curse");
+
+            CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "R Weapon 1");
+            CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "R Weapon 2");
+            CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "R Weapon 3");
+            
+            CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "L Weapon 1");
+            CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "L Weapon 2");
+            CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "L Weapon 3");
+        }
+
+        void CreateWeaponStatusSlot(List<PlayerStatusDef> l, Transform p, AttackDefenseType t, string txt1Text = null) {
+            PlayerStatusDef w = new PlayerStatusDef();
+
+            GameObject g = Instantiate(playerStatus.doubleSlot_template) as GameObject;
+            g.SetActive(true);
+            g.transform.SetParent(p);
+            w.type = t;
+            w.slot = g.GetComponent<InventoryUIDoubleSlot>();
+            if (string.IsNullOrEmpty(txt1Text))
+                w.slot.text1.text = t.ToString();
+            else
+                w.slot.text1.text = txt1Text;
+            w.slot.text2.text = "30";
+            w.slot.text3.text = "30";
+            g.transform.localScale = Vector3.one;
+        }
+
+        void CreateAttackPowerSlot(List<AttackPowerSlot> l, Transform p, string id) {
+            AttackPowerSlot a = new AttackPowerSlot();
+            l.Add(a);
+
+            GameObject g = Instantiate(weaponInfo.slot_template) as GameObject;
+            g.transform.SetParent(p);
+            a.slot = g.GetComponent<InventoryUISlot>();
+            a.slot.text1.text = id;
+            a.slot.text2.text = "30";
+            g.SetActive(true);
+            g.transform.localScale = Vector3.one;
+         }
 
         void CreateAttDefUIElement(List<AttDefType> l, Transform p, AttackDefenseType t) {
             AttDefType a = new AttDefType();
@@ -100,7 +162,7 @@ namespace UI {
             g.transform.localScale = Vector3.one;
         }
 
-        void CreateAttributeElement(List<AttributeSlot> l, Transform p, AttributeType t)
+        void CreateAttributeElement(List<AttributeSlot> l, Transform p, AttributeType t, string txt1Text = null)
         {
             AttributeSlot a = new AttributeSlot();
             a.type = t;
@@ -109,7 +171,10 @@ namespace UI {
             GameObject g = Instantiate(playerStatus.slotTemplate) as GameObject;
             g.transform.SetParent(p);
             a.slot = g.GetComponent<InventoryUISlot>();
-            a.slot.text1.text = t.ToString();
+            if (string.IsNullOrEmpty(txt1Text))
+                a.slot.text1.text = t.ToString();
+            else
+                a.slot.text1.text = txt1Text;
             a.slot.text2.text = "30";
             g.SetActive(true);
             g.transform.localScale = Vector3.one;
@@ -166,9 +231,16 @@ namespace UI {
     [System.Serializable]
     public class PlayerStatus {
         public GameObject slotTemplate;
+        public GameObject doubleSlot_template;
         public GameObject emptySlot;
-        public Transform grid;
+        public Transform attGrid;
+        public Transform apGrid;
+        public Transform defGrid;
+        public Transform resGrid;
         public List<AttributeSlot> attSlot = new List<AttributeSlot>();
+        public List<AttackPowerSlot> apSlots = new List<AttackPowerSlot>();
+        public List<PlayerStatusDef> defSlots = new List<PlayerStatusDef>();
+        public List<PlayerStatusDef> resSlots = new List<PlayerStatusDef>();
     }
 
     [System.Serializable]
@@ -260,4 +332,14 @@ namespace UI {
 
     #endregion
 
+    [System.Serializable]
+    public class AttackPowerSlot {
+        public InventoryUISlot slot;
+    }
+
+    [System.Serializable]
+    public class PlayerStatusDef {
+        public AttackDefenseType type;
+        public InventoryUIDoubleSlot slot;
+    }
 }
