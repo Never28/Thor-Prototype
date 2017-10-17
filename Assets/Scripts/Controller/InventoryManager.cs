@@ -388,8 +388,6 @@ public class Item {
     public string name_item;
     public string itemDescription;
     public Sprite icon;
-
-
 }
 
 [System.Serializable]

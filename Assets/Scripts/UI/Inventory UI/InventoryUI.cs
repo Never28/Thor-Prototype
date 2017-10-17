@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UI { 
+namespace UI
+{
 
-    public class InventoryUI : MonoBehaviour {
+    public class InventoryUI : MonoBehaviour
+    {
 
         public EquipmentLeft eq_left;
         public CenterOverlay c_Overlay;
@@ -15,20 +17,118 @@ namespace UI {
         public GameObject gameMenu, inventory, centerMain, centerRight, centerOverlay;
 
         List<IconBase> iconSlotsCreated = new List<IconBase>();
+        public EquipmentSlotsUI equipSlotsUI;
 
-        #region Init        
-        
-        void Start() {
-            CreateUIElements();
+        public Transform eqSlotParent;
+        //public List<EquipmentUISlot> equipSlots = new List<EquipmentUISlot>();
+        EquipmentUISlot[,] equipSlots;
+
+        public Vector3 curSlotPos;
+
+        float inputT;
+        bool dontMove;
+
+        public Color unselected;
+        public Color selected;
+        public EquipmentUISlot curEqSlot;
+
+        float inputTimer;
+        public float inputDelay = 0.4f;
+
+        void HandleSlotMovement() {
+            int x = Mathf.RoundToInt(curSlotPos.x);
+            int y = Mathf.RoundToInt(curSlotPos.y);
+
+            bool up = (Input.GetAxis(StaticStrings.Vertical) > 0);
+            bool down = (Input.GetAxis(StaticStrings.Vertical) < 0);
+            bool left = (Input.GetAxis(StaticStrings.Horizontal) < 0);
+            bool right = (Input.GetAxis(StaticStrings.Horizontal) > 0);
+
+            if (!up && !down && !left && !right)
+            {
+                inputTimer = 0;
+            }
+            else {
+                inputTimer -= Time.deltaTime;
+            }
+
+            if (inputTimer < 0)
+                inputTimer = 0;
+            if (inputTimer > 0)
+                return;
+
+
+            if (up) {
+                inputTimer = inputDelay;
+                y--;
+            }
+            if (down) {
+                inputTimer = inputDelay;
+                y++;
+            }
+            if (left) {
+                inputTimer = inputDelay;
+                x--;
+            }
+            if (right) {
+                inputTimer = inputDelay;
+                x++;
+            }
+            if (x > 4)
+                x = 0;
+            if(x < 0)
+                x = 4;
+            if (y > 5)
+                y = 0;
+            if (y < 0)
+                y = 5;
+
+            if (curEqSlot)
+                curEqSlot.icon.background.color = unselected;
+
+            if (x == 4 && y == 3) {
+                x = 4;
+                y = 2;
+            }
+
+            curEqSlot = equipSlots[x, y];
+            curSlotPos.x = x;
+            curSlotPos.y = y;
+            if(curEqSlot)
+                curEqSlot.icon.background.color = selected;
         }
 
-        void CreateUIElements() {
+        #region Init
+
+        void Start()
+        {
+            CreateUIElements();
+            InitEqSlots();
+        }
+
+        void InitEqSlots()
+        {
+            EquipmentUISlot[] eq = eqSlotParent.GetComponentsInChildren<EquipmentUISlot>();
+            equipSlots = new EquipmentUISlot[5, 6];
+
+            for (int i = 0; i < eq.Length; i++)
+            {
+                eq[i].Init(this);
+                int x = Mathf.RoundToInt(eq[i].slotPos.x);
+                int y = Mathf.RoundToInt(eq[i].slotPos.y);
+                equipSlots[x, y] = eq[i];
+            }
+        }
+
+        void CreateUIElements()
+        {
             WeaponInfoInit();
             PlayerStatusInit();
             WeaponStatusInit();
         }
 
-        void WeaponInfoInit() {
+        void WeaponInfoInit()
+        {
             for (int i = 0; i < 6; i++)
             {
                 CreateAttDefUIElement(weaponInfo.ap_slots, weaponInfo.ap_grid, (AttackDefenseType)i);
@@ -55,7 +155,8 @@ namespace UI {
             CreateAttributeElement_Mini(weaponInfo.att_req, weaponInfo.att_r_grid, AttributeType.faith);
         }
 
-        void PlayerStatusInit() {
+        void PlayerStatusInit()
+        {
             CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.level, "Level");
 
             CreateEmptyElement(playerStatus.attGrid);
@@ -84,7 +185,8 @@ namespace UI {
             CreateAttributeElement(playerStatus.attSlot, playerStatus.attGrid, AttributeType.attunement_slots, "Attunement Slots");
         }
 
-        void WeaponStatusInit() {
+        void WeaponStatusInit()
+        {
             CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.physical, "Physical");
             CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.strike, "Vs Strike");
             CreateWeaponStatusSlot(playerStatus.defSlots, playerStatus.defGrid, AttackDefenseType.slash, "Vs Slash");
@@ -103,13 +205,14 @@ namespace UI {
             CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "R Weapon 1");
             CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "R Weapon 2");
             CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "R Weapon 3");
-            
+
             CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "L Weapon 1");
             CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "L Weapon 2");
             CreateAttackPowerSlot(playerStatus.apSlots, playerStatus.apGrid, "L Weapon 3");
         }
 
-        void CreateWeaponStatusSlot(List<PlayerStatusDef> l, Transform p, AttackDefenseType t, string txt1Text = null) {
+        void CreateWeaponStatusSlot(List<PlayerStatusDef> l, Transform p, AttackDefenseType t, string txt1Text = null)
+        {
             PlayerStatusDef w = new PlayerStatusDef();
 
             GameObject g = Instantiate(playerStatus.doubleSlot_template) as GameObject;
@@ -126,7 +229,8 @@ namespace UI {
             g.transform.localScale = Vector3.one;
         }
 
-        void CreateAttackPowerSlot(List<AttackPowerSlot> l, Transform p, string id) {
+        void CreateAttackPowerSlot(List<AttackPowerSlot> l, Transform p, string id)
+        {
             AttackPowerSlot a = new AttackPowerSlot();
             l.Add(a);
 
@@ -137,9 +241,10 @@ namespace UI {
             a.slot.text2.text = "30";
             g.SetActive(true);
             g.transform.localScale = Vector3.one;
-         }
+        }
 
-        void CreateAttDefUIElement(List<AttDefType> l, Transform p, AttackDefenseType t) {
+        void CreateAttDefUIElement(List<AttDefType> l, Transform p, AttackDefenseType t)
+        {
             AttDefType a = new AttDefType();
             a.type = t;
             l.Add(a);
@@ -208,8 +313,9 @@ namespace UI {
         #endregion
 
         public UIState curState;
-        
-        public void LoadCurrentItems(ItemType t) {
+
+        public void LoadCurrentItems(ItemType t)
+        {
             List<Item> itemList = SessionManager.singleton.GetItems(t);
 
             if (itemList == null)
@@ -224,7 +330,8 @@ namespace UI {
             int extra = (dif > 0) ? dif : 0;
             for (int i = 0; i < itemList.Count + extra; i++)
             {
-                if (i > itemList.Count - 1) {
+                if (i > itemList.Count - 1)
+                {
                     iconSlotsCreated[i].gameObject.SetActive(false);
                     continue;
                 }
@@ -238,51 +345,142 @@ namespace UI {
                     icon = g.GetComponent<IconBase>();
                     iconSlotsCreated.Add(icon);
                 }
-                else {
+                else
+                {
                     icon = iconSlotsCreated[i];
                 }
-                icon.gameObject.SetActive(true);
                 icon.icon.enabled = true;
                 icon.icon.sprite = itemList[i].icon;
                 icon.id = itemList[i].item_id;
             }
         }
 
-        public ItemType typeDebug;
+        public void Tick()
+        {
 
-        public bool load;
-        void Update() {
-            if (load) { 
-                load = false;
-                LoadCurrentItems(typeDebug);
+        }
+
+        public void LoadEquipment(InventoryManager inv)
+        {
+            for (int i = 0; i < inv.rh_weapons.Count; i++)
+            {
+                if (i > 2)
+                    break;
+
+                EquipmentUISlot slot = equipSlotsUI.weapon[i];
+                equipSlotsUI.UpdateEqSlot(inv.rh_weapons[i], slot, ItemType.weapon);
+            }
+            for (int i = 0; i < inv.lh_weapons.Count; i++)
+            {
+                if (i > 2)
+                    break;
+
+                EquipmentUISlot slot = equipSlotsUI.weapon[i + 3];
+                equipSlotsUI.UpdateEqSlot(inv.lh_weapons[i], slot, ItemType.weapon);
+            }
+
+            for (int i = 0; i < inv.consumable_items.Count; i++)
+            {
+                if (i > 9)
+                    break;
+
+                EquipmentUISlot slot = equipSlotsUI.cons[i];
+                equipSlotsUI.UpdateEqSlot(inv.consumable_items[i], slot, ItemType.consum); 
             }
         }
 
-        public void Tick() { 
-        
+        public InventoryManager invManager;
+        public bool load;
+
+        void Update()
+        {
+            if (load)
+            {
+                LoadEquipment(invManager);
+                load = false;
+            }
+
+            HandleSlotMovement();
         }
 
         public static InventoryUI singleton;
-        void Awake() {
+        void Awake()
+        {
             singleton = this;
         }
 
     }
 
-    public enum UIState { 
+    public enum EqSlotType
+    {
+        weapons, arrows, bolts, equipment, rings, covenant, consumables
+    }
+
+    public enum UIState
+    {
         equipment, inventory, attributes, messages, options
     }
 
     [System.Serializable]
-    public class EquipmentLeft{
+    public class EquipmentSlotsUI
+    {
+        public List<EquipmentUISlot> weapon = new List<EquipmentUISlot>();
+        public List<EquipmentUISlot> arrow = new List<EquipmentUISlot>();
+        public List<EquipmentUISlot> bolt = new List<EquipmentUISlot>();
+        public List<EquipmentUISlot> equipment = new List<EquipmentUISlot>();
+        public List<EquipmentUISlot> ring = new List<EquipmentUISlot>();
+        public List<EquipmentUISlot> cons = new List<EquipmentUISlot>();
+        public EquipmentUISlot covenant = new EquipmentUISlot();
+
+        public void UpdateEqSlot(string itemId, EquipmentUISlot s, ItemType itemType) {
+            Item item = ResourcesManager.singleton.GetItem(itemId, itemType);
+            s.icon.icon.sprite = item.icon;
+            s.icon.icon.enabled = true; 
+            s.icon.id = item.item_id;
+        }
+
+        public void AddSlotOnList(EquipmentUISlot eq)
+        {
+            switch (eq.slotType)
+            {
+                case EqSlotType.weapons:
+                    weapon.Add(eq);
+                    break;
+                case EqSlotType.arrows:
+                    arrow.Add(eq);
+                    break;
+                case EqSlotType.bolts:
+                    bolt.Add(eq);
+                    break;
+                case EqSlotType.equipment:
+                    equipment.Add(eq);
+                    break;
+                case EqSlotType.rings:
+                    ring.Add(eq);
+                    break;
+                case EqSlotType.covenant:
+                    covenant = eq;
+                    break;
+                case EqSlotType.consumables:
+                    cons.Add(eq);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    [System.Serializable]
+    public class EquipmentLeft
+    {
         public Text slotName;
         public Text curItem;
-        public EquipmentSlots equipmentSlots;
         public Left_Inventory inventory;
     }
 
     [System.Serializable]
-    public class PlayerStatus {
+    public class PlayerStatus
+    {
         public GameObject slotTemplate;
         public GameObject doubleSlot_template;
         public GameObject emptySlot;
@@ -297,19 +495,16 @@ namespace UI {
     }
 
     [System.Serializable]
-    public class Left_Inventory {
+    public class Left_Inventory
+    {
         public Slider invSlider;
         public GameObject slotTemplate;
         public Transform slotGrid;
     }
 
     [System.Serializable]
-    public class EquipmentSlots { 
-
-    }
-
-    [System.Serializable]
-    public class CenterOverlay {
+    public class CenterOverlay
+    {
         public Image bigIcon;
         public Text itemName;
         public Text itemDescription;
@@ -319,7 +514,8 @@ namespace UI {
 
     #region WeaponInfo
     [System.Serializable]
-    public class WeaponInfo {
+    public class WeaponInfo
+    {
         public Image smallIcon;
         public GameObject slot_template;
         public GameObject slot_mini;
@@ -343,12 +539,13 @@ namespace UI {
         public Transform att_r_grid;
         public List<AttributeSlot> att_req = new List<AttributeSlot>();
 
-        public AttributeSlot GetAttributeSlot(List<AttributeSlot> l, AttributeType type){
+        public AttributeSlot GetAttributeSlot(List<AttributeSlot> l, AttributeType type)
+        {
             for (int i = 0; i < l.Count; i++)
-			{
-			 if(l[i].type == type)
-                 return l[i];
-			}
+            {
+                if (l[i].type == type)
+                    return l[i];
+            }
             return null;
         }
 
@@ -370,28 +567,32 @@ namespace UI {
     }
 
     [System.Serializable]
-    public class AttributeSlot {
+    public class AttributeSlot
+    {
         public bool isBreak;
         public AttributeType type;
-        public InventoryUISlot slot;
-    } 
-
-    [System.Serializable]
-    public class AttDefType {
-        public bool isBreak;
-        public AttackDefenseType type;
-        public InventoryUISlot slot;
-    } 
-
-    #endregion
-
-    [System.Serializable]
-    public class AttackPowerSlot {
         public InventoryUISlot slot;
     }
 
     [System.Serializable]
-    public class PlayerStatusDef {
+    public class AttDefType
+    {
+        public bool isBreak;
+        public AttackDefenseType type;
+        public InventoryUISlot slot;
+    }
+
+    #endregion
+
+    [System.Serializable]
+    public class AttackPowerSlot
+    {
+        public InventoryUISlot slot;
+    }
+
+    [System.Serializable]
+    public class PlayerStatusDef
+    {
         public AttackDefenseType type;
         public InventoryUIDoubleSlot slot;
     }
