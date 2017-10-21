@@ -106,14 +106,14 @@ public static class StaticFunctions {
             return;
         }
         
-        to.physical = from.physical;
-        to.strike = from.strike;
-        to.slash = from.slash;
-        to.thrust = from.thrust;
-        to.magic = from.magic;
-        to.fire = from.fire;
-        to.lightning = from.lightning;
-        to.dark = from.dark;
+        to.a_physical = from.a_physical;
+        to.a_strike = from.a_strike;
+        to.a_slash = from.a_slash;
+        to.a_thrust = from.a_thrust;
+        to.a_magic = from.a_magic;
+        to.a_fire = from.a_fire;
+        to.a_lightning = from.a_lightning;
+        to.a_dark = from.a_dark;
     }
 
     public static void DeepCopySpell(Spell from, Spell to) {

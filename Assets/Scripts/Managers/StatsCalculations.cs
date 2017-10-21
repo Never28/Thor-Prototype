@@ -6,17 +6,17 @@ public static class StatsCalculations {
 
     public static int CalculateBaseDamage(WeaponStats wStats, CharacterStats cStats, float multiplier = 1) {
 
-        float physical = (wStats.physical * multiplier) - cStats.physical;
-        float slash = (wStats.slash * multiplier) - cStats.vs_slash;
-        float strike = (wStats.strike * multiplier) - cStats.vs_strike;
-        float thrust = (wStats.thrust * multiplier) - cStats.vs_thrust;
+        float physical = (wStats.a_physical * multiplier) - cStats.physical;
+        float slash = (wStats.a_slash * multiplier) - cStats.vs_slash;
+        float strike = (wStats.a_strike * multiplier) - cStats.vs_strike;
+        float thrust = (wStats.a_thrust * multiplier) - cStats.vs_thrust;
 
         float sum = physical + slash + strike + thrust;
 
-        float magic = (wStats.magic * multiplier) - cStats.magic;
-        float fire = (wStats.fire * multiplier) - cStats.fire;
-        float lightning = (wStats.lightning * multiplier) - cStats.lightning;
-        float dark = (wStats.dark * multiplier) - cStats.dark;
+        float magic = (wStats.a_magic * multiplier) - cStats.magic;
+        float fire = (wStats.a_fire * multiplier) - cStats.fire;
+        float lightning = (wStats.a_lightning * multiplier) - cStats.lightning;
+        float dark = (wStats.a_dark * multiplier) - cStats.dark;
 
         sum += magic + fire + lightning + dark;
 

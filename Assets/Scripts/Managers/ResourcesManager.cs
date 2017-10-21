@@ -238,7 +238,6 @@ public class ResourcesManager : MonoBehaviour {
         }
 
         int index = GetIndexFromString(weaponStatsIds, id);
-
         if (index == -1)
             return null;
 

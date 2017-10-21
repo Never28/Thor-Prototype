@@ -103,12 +103,35 @@ public class Attributes {
 [System.Serializable]
 public class WeaponStats{
     public string weaponId;
-    public int physical;
-    public int strike;
-    public int slash;
-    public int thrust;
-    public int magic = 0;
-    public int fire = 0;
-    public int lightning = 0;
-    public int dark = 0;
+    public int a_physical;
+    public int a_strike;
+    public int a_slash;
+    public int a_thrust;
+    public int a_magic = 0;
+    public int a_fire = 0;
+    public int a_lightning = 0;
+    public int a_dark = 0;
+    public int a_frost = 0;
+    public int a_curse = 0;
+    public int a_poison = 0;
+    public int critical = 0;
+
+    public float d_physical;
+    public float d_strike;
+    public float d_slash;
+    public float d_thrust;
+    public float d_magic = 0;
+    public float d_fire = 0;
+    public float d_lightning = 0;
+    public float d_dark = 0;
+    public float d_frost = 0;
+    public float d_curse = 0;
+    public float d_poison = 0;
+    public float stability = 0;
+
+    public string weaponType;
+    public string damageType;
+    public string skillName;
+    public float weightCost = 5;
+    public float maxDurability = 80;
 }

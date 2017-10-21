@@ -5,6 +5,7 @@ using UnityEngine;
 namespace UI {
     public class EquipmentUISlot : MonoBehaviour
     {
+        public string slotName;
         public IconBase icon;
         public EqSlotType slotType;
 

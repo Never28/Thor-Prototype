@@ -387,6 +387,7 @@ public class Item {
     public string item_id;
     public string name_item;
     public string itemDescription;
+    public string skillDescription;
     public Sprite icon;
 }
 

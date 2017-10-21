@@ -10,7 +10,7 @@ namespace UI
     {
 
         public EquipmentLeft eq_left;
-        public CenterOverlay c_Overlay;
+        public CenterOverlay c_overlay;
         public WeaponInfo weaponInfo;
         public PlayerStatus playerStatus;
 
@@ -31,6 +31,7 @@ namespace UI
         public Color unselected;
         public Color selected;
         public EquipmentUISlot curEqSlot;
+        public EquipmentUISlot prevEqSlot;
 
         float inputTimer;
         public float inputDelay = 0.4f;
@@ -397,10 +398,113 @@ namespace UI
             if (load)
             {
                 LoadEquipment(invManager);
+                prevEqSlot = null;
                 load = false;
             }
 
             HandleSlotMovement();
+            if (prevEqSlot != curEqSlot) {
+                LoadItemFromSlot();
+            }
+            prevEqSlot = curEqSlot;
+        }
+
+        void LoadItemFromSlot() {
+            if (curEqSlot == null)
+                return;
+
+            if (string.IsNullOrEmpty(curEqSlot.icon.id)) {
+                curEqSlot.icon.id = "unarmed";
+            }
+
+            ResourcesManager rm = ResourcesManager.singleton;
+
+            eq_left.slotName.text = curEqSlot.slotName;
+
+            switch (curEqSlot.slotType)
+            {
+                case EqSlotType.weapons:
+                    LoadWeaponItem(rm);
+                    break;
+                case EqSlotType.arrows:
+                    break;
+                case EqSlotType.bolts:
+                    break;
+                case EqSlotType.equipment:
+                    break;
+                case EqSlotType.rings:
+                    break;
+                case EqSlotType.covenant:
+                    break;
+                case EqSlotType.consumables:
+                    LoadConsumableItem(rm);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        void LoadWeaponItem(ResourcesManager rm) {
+            string weaponId = curEqSlot.icon.id;
+            WeaponStats stats = rm.GetWeaponStats(weaponId);
+            Item item = rm.GetItem(curEqSlot.icon.id, ItemType.weapon);
+
+            eq_left.curItem.text = item.name_item;
+
+            UpdateCenterOverlay(item);
+
+            //Center
+            weaponInfo.smallIcon.sprite = item.icon;
+            weaponInfo.itemName.text = item.name_item;
+            weaponInfo.weaponType.text = stats.weaponType;
+            weaponInfo.damageType.text = stats.damageType;
+            weaponInfo.skillName.text = stats.skillName;
+            weaponInfo.weight.text = stats.weightCost.ToString();
+            weaponInfo.durability_cur.text = stats.maxDurability.ToString();
+            weaponInfo.durability_max.text = stats.maxDurability.ToString();
+
+            c_overlay.skillName.text = stats.skillName;
+
+            UpdateUIAttackDefenseElement(AttackDefenseType.physical, weaponInfo.ap_slots, stats.a_physical.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.magic, weaponInfo.ap_slots, stats.a_magic.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.fire, weaponInfo.ap_slots, stats.a_fire.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.lightning, weaponInfo.ap_slots, stats.a_lightning.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.dark, weaponInfo.ap_slots, stats.a_dark.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.critical, weaponInfo.ap_slots, stats.critical.ToString());
+
+            UpdateUIAttackDefenseElement(AttackDefenseType.frost, weaponInfo.a_effects, stats.a_frost.ToString(), true);
+            UpdateUIAttackDefenseElement(AttackDefenseType.curse, weaponInfo.a_effects, stats.a_curse.ToString(), true);
+            //UpdateUIAttackDefenseElement(AttackDefenseType.poison, weaponInfo.ap_slots, stats.poison.ToString());
+
+            UpdateUIAttackDefenseElement(AttackDefenseType.physical, weaponInfo.g_absorb, stats.d_physical.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.magic, weaponInfo.g_absorb, stats.d_magic.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.fire, weaponInfo.g_absorb, stats.d_fire.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.lightning, weaponInfo.g_absorb, stats.d_lightning.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.dark, weaponInfo.g_absorb, stats.d_dark.ToString());
+            UpdateUIAttackDefenseElement(AttackDefenseType.stability, weaponInfo.g_absorb, stats.stability.ToString());
+
+        }
+
+        void UpdateUIAttackDefenseElement(AttackDefenseType t, List<AttDefType> l, string value, bool onText1 = false) {
+            AttDefType s1 = weaponInfo.GetAttDefSlot(l, t);
+            if (!onText1)
+                s1.slot.text2.text = value;
+            else
+                s1.slot.text1.text = value;
+        }
+
+        void UpdateCenterOverlay(Item item) {
+            c_overlay.bigIcon.sprite = item.icon;
+            c_overlay.itemName.text = item.name_item;
+            c_overlay.itemDescription.text = item.itemDescription;
+            c_overlay.skillDescription.text = item.skillDescription;
+        }
+
+        void LoadConsumableItem(ResourcesManager rm) {
+            string weaponId = curEqSlot.icon.id;
+            Item item = rm.GetItem(curEqSlot.icon.id, ItemType.consum);
+
+            UpdateCenterOverlay(item);
         }
 
         public static InventoryUI singleton;
